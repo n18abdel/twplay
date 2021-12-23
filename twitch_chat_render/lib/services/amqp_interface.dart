@@ -21,12 +21,19 @@ class AmqpInterface {
     });
     return completer.future;
   }
+
+  void setupLogSync() async {
+    Channel channel = await client.channel();
+    Exchange exchange =
+        await channel.exchange("topic_chat", ExchangeType.TOPIC);
+    Consumer consumer = await exchange.bindPrivateQueueConsumer(["sync.#"]);
+    consumer.listen((message) {
+      print("${message.routingKey} - ${message.payloadAsString}");
+    });
+  }
 }
 
 void main() async {
   AmqpInterface interface = AmqpInterface();
-  Map chat = await interface.retriveChat();
-  print(chat.keys);
-  print(chat['comments'].length);
-  print(chat['comments'][0]);
+  interface.setupLogSync();
 }
