@@ -2,6 +2,8 @@ import pika
 from python_mpv_jsonipc import MPV
 import time
 
+UPDATE_PERIOD = 60
+
 # Uses MPV that is in the PATH.
 mpv = MPV()
 
@@ -57,7 +59,7 @@ mpv.play("https://www.twitch.tv/videos/1235109843")
 t0 = time.time()
 while mpv.mpv_process.process.poll() is None:
     t1 = time.time()
-    if (t1-t0) >= 60.0:
+    if (t1-t0) >= UPDATE_PERIOD:
         t0 = t1
         if mpv.time_pos:
             channel.basic_publish(exchange='topic_chat',
