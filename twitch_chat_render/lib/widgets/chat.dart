@@ -14,10 +14,9 @@ class Chat extends StatefulWidget {
 
 class _ChatState extends State<Chat> {
   final int _maxMessageCount = 200;
-  late List<Comment>? comments;
+  List<Comment>? comments;
   int nextMessageIndex = 0;
   Duration updatePeriod = const Duration(milliseconds: 300);
-  bool init = false;
   int? initTick;
   ScrollController scrollController = ScrollController();
 
@@ -26,7 +25,7 @@ class _ChatState extends State<Chat> {
     super.initState();
     retrieveComments();
     Timer.periodic(updatePeriod, (Timer timer) {
-      if (init) {
+      if (comments != null) {
         initTick ??= timer.tick;
         setState(() {
           double currentTime =
@@ -42,9 +41,7 @@ class _ChatState extends State<Chat> {
 
   void retrieveComments() async {
     comments = ChatModel.fromJson(await AmqpInterface().retriveChat()).comments;
-    setState(() {
-      init = true;
-    });
+    setState(() {});
   }
 
   List<Comment>? activeComments() {
@@ -62,7 +59,7 @@ class _ChatState extends State<Chat> {
         scrollController.jumpTo(scrollController.position.maxScrollExtent);
       }
     });
-    return init
+    return comments != null
         ? ListView.builder(
             controller: scrollController,
             itemCount: activeComments()?.length ?? 0,
