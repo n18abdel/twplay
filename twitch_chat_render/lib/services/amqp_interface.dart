@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
 
 import "package:dart_amqp/dart_amqp.dart";
 
@@ -10,8 +12,9 @@ class AmqpInterface {
     final completer = Completer<Map<String, dynamic>>();
 
     Channel channel = await client.channel();
-    Exchange exchange = await channel.exchange("chat", ExchangeType.FANOUT);
-    Consumer consumer = await exchange.bindPrivateQueueConsumer(null);
+    Exchange exchange =
+        await channel.exchange("topic_chat", ExchangeType.TOPIC);
+    Consumer consumer = await exchange.bindPrivateQueueConsumer(["json"]);
     consumer.listen((message) {
       completer.complete(jsonDecode(message.payloadAsString));
       channel.close();
