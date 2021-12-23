@@ -44,12 +44,13 @@ class _ChatState extends State<Chat> {
     });
   }
 
-  void pause() {
+  void pause(double playerPosition) {
     timer?.cancel();
+    chatTime = playerPosition;
   }
 
   void adjustTimer(double playerPosition) {
-    pause();
+    pause(playerPosition);
     play(playerPosition);
   }
 

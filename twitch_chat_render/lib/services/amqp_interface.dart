@@ -34,22 +34,13 @@ class AmqpInterface {
     Channel channel = await client.channel();
     Exchange exchange =
         await channel.exchange("topic_chat", ExchangeType.TOPIC);
-    Consumer consumerPlay =
-        await exchange.bindPrivateQueueConsumer(["sync.play"]);
-    Consumer consumerPause =
-        await exchange.bindPrivateQueueConsumer(["sync.pause"]);
-    Consumer consumerTimer =
-        await exchange.bindPrivateQueueConsumer(["sync.timer"]);
-    consumerPlay.listen((message) {
-      double playerPosition = double.parse(message.payloadAsString);
-      callbacks["play"]!(playerPosition);
-    });
-    consumerPause.listen((message) {
-      callbacks["pause"]!();
-    });
-    consumerTimer.listen((message) {
-      double playerPosition = double.parse(message.payloadAsString);
-      callbacks["timer"]!(playerPosition);
+    callbacks.forEach((key, value) async {
+      Consumer consumer =
+          await exchange.bindPrivateQueueConsumer(["sync.$key"]);
+      consumer.listen((message) {
+        double playerPosition = double.parse(message.payloadAsString);
+        callbacks[key]!(playerPosition);
+      });
     });
   }
 }
