@@ -17,21 +17,26 @@ class _ChatState extends State<Chat> {
   List<Comment>? comments;
   int nextMessageIndex = 0;
   Duration updatePeriod = const Duration(milliseconds: 300);
-  int? initTick;
+  Timer? timer;
+  double chatTime = 0;
   ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     retrieveComments();
-    Timer.periodic(updatePeriod, (Timer timer) {
+    setupSync();
+  }
+
+  void play(double playerPosition) {
+    timer = Timer.periodic(updatePeriod, (Timer timer) {
       if (comments != null) {
-        initTick ??= timer.tick;
         setState(() {
-          double currentTime =
-              (timer.tick - initTick!) * updatePeriod.inMilliseconds / 1000;
+          double elapsedTimerDuration =
+              timer.tick * updatePeriod.inMilliseconds / 1000;
+          chatTime = playerPosition + elapsedTimerDuration;
           while (nextMessageIndex < comments!.length - 1 &&
-              comments![nextMessageIndex].contentOffsetSeconds! < currentTime) {
+              comments![nextMessageIndex].contentOffsetSeconds! < chatTime) {
             nextMessageIndex++;
           }
         });
@@ -39,9 +44,23 @@ class _ChatState extends State<Chat> {
     });
   }
 
+  void pause() {
+    timer?.cancel();
+  }
+
+  void adjustTimer(double playerPosition) {
+    pause();
+    play(playerPosition);
+  }
+
   void retrieveComments() async {
     comments = ChatModel.fromJson(await AmqpInterface().retriveChat()).comments;
     setState(() {});
+  }
+
+  void setupSync() {
+    AmqpInterface()
+        .setupSync({"play": play, "pause": pause, "timer": adjustTimer});
   }
 
   List<Comment>? activeComments() {
