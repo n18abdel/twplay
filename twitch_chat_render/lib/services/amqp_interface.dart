@@ -4,7 +4,7 @@ import 'dart:convert';
 import "package:dart_amqp/dart_amqp.dart";
 
 class AmqpInterface {
-  final Client client = Client();
+  static final Client client = Client();
 
   Future<Map<String, dynamic>> retriveChat() async {
     final completer = Completer<Map<String, dynamic>>();
