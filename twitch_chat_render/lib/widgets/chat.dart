@@ -19,6 +19,7 @@ class _ChatState extends State<Chat> {
   Duration updatePeriod = const Duration(milliseconds: 300);
   Timer? timer;
   double chatTime = 0;
+  bool playing = false;
   ScrollController scrollController = ScrollController();
 
   @override
@@ -29,29 +30,61 @@ class _ChatState extends State<Chat> {
   }
 
   void play(double playerPosition) {
+    playing = true;
     timer = Timer.periodic(updatePeriod, (Timer timer) {
       if (comments != null) {
         setState(() {
-          double elapsedTimerDuration =
-              timer.tick * updatePeriod.inMilliseconds / 1000;
-          chatTime = playerPosition + elapsedTimerDuration;
-          while (nextMessageIndex < comments!.length - 1 &&
-              comments![nextMessageIndex].contentOffsetSeconds! < chatTime) {
-            nextMessageIndex++;
-          }
+          forwardMessageIndex(playerPosition);
         });
       }
     });
   }
 
   void pause(double playerPosition) {
+    playing = false;
     timer?.cancel();
-    chatTime = playerPosition;
   }
 
   void adjustTimer(double playerPosition) {
-    pause(playerPosition);
-    play(playerPosition);
+    if (playing) {
+      pause(playerPosition);
+      play(playerPosition);
+    } else {
+      setState(() {
+        forwardMessageIndex(playerPosition);
+        pause(playerPosition);
+      });
+    }
+  }
+
+  void seek(double playerPosition) {
+    setState(() {
+      if (playerPosition > chatTime) {
+        forwardMessageIndex(playerPosition);
+      } else {
+        backwardMessageIndex(playerPosition);
+      }
+    });
+  }
+
+  double elapsedTimerDuration() {
+    return timer == null ? 0 : timer!.tick * updatePeriod.inMilliseconds / 1000;
+  }
+
+  void forwardMessageIndex(double playerPosition) {
+    chatTime = playerPosition + elapsedTimerDuration();
+    while (nextMessageIndex < comments!.length - 1 &&
+        comments![nextMessageIndex].contentOffsetSeconds! < chatTime) {
+      nextMessageIndex++;
+    }
+  }
+
+  void backwardMessageIndex(double playerPosition) {
+    chatTime = playerPosition + elapsedTimerDuration();
+    while (nextMessageIndex > 0 &&
+        comments![nextMessageIndex - 1].contentOffsetSeconds! > chatTime) {
+      nextMessageIndex--;
+    }
   }
 
   void retrieveComments() async {
@@ -60,8 +93,8 @@ class _ChatState extends State<Chat> {
   }
 
   void setupSync() {
-    AmqpInterface()
-        .setupSync({"play": play, "pause": pause, "timer": adjustTimer});
+    AmqpInterface().setupSync(
+        {"play": play, "pause": pause, "timer": adjustTimer, "seek": seek});
   }
 
   List<Comment>? activeComments() {
