@@ -25,6 +25,14 @@ def on_loading(event_data):
     mpv.pause = "yes"
 
 
+@mpv.on_event("seek")
+def on_loading(event_data):
+    if mpv.time_pos:
+        channel.basic_publish(exchange='topic_chat',
+                              routing_key='sync.seek',
+                              body=str(mpv.time_pos))
+
+
 @mpv.property_observer("pause")
 def on_play_pause(property_name, new_value):
     if mpv.time_pos:
