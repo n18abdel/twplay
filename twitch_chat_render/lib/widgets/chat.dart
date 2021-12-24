@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/amqp_interface.dart';
+import 'package:twitch_chat_render/services/twitch_badges.dart';
 import 'package:twitch_chat_render/widgets/chat_message.dart';
 
 class Chat extends StatefulWidget {
@@ -14,7 +15,9 @@ class Chat extends StatefulWidget {
 
 class _ChatState extends State<Chat> {
   final int _maxMessageCount = 200;
+  Streamer? streamer;
   List<Comment>? comments;
+  TwitchBadges? badges;
   int nextMessageIndex = 0;
   Duration updatePeriod = const Duration(milliseconds: 300);
   Timer? timer;
@@ -74,24 +77,38 @@ class _ChatState extends State<Chat> {
   }
 
   void forwardMessageIndex(double playerPosition) {
-    chatTime = playerPosition + elapsedTimerDuration();
-    while (nextMessageIndex < comments!.length - 1 &&
-        comments![nextMessageIndex].contentOffsetSeconds! < chatTime) {
-      nextMessageIndex++;
+    if (comments != null) {
+      chatTime = playerPosition + elapsedTimerDuration();
+      while (nextMessageIndex < comments!.length - 1 &&
+          comments![nextMessageIndex].contentOffsetSeconds! < chatTime) {
+        nextMessageIndex++;
+      }
     }
   }
 
   void backwardMessageIndex(double playerPosition) {
-    chatTime = playerPosition + elapsedTimerDuration();
-    while (nextMessageIndex > 0 &&
-        comments![nextMessageIndex - 1].contentOffsetSeconds! > chatTime) {
-      nextMessageIndex--;
+    if (comments != null) {
+      chatTime = playerPosition + elapsedTimerDuration();
+      while (nextMessageIndex > 0 &&
+          comments![nextMessageIndex - 1].contentOffsetSeconds! > chatTime) {
+        nextMessageIndex--;
+      }
     }
   }
 
   void retrieveComments() async {
-    comments = ChatModel.fromJson(await AmqpInterface().retriveChat()).comments;
-    setState(() {});
+    ChatModel chat = ChatModel.fromJson(await AmqpInterface().retriveChat());
+
+    setState(() {
+      streamer = chat.streamer;
+      comments = chat.comments;
+      fetchBadges();
+    });
+  }
+
+  void fetchBadges() async {
+    badges = TwitchBadges(streamer: streamer);
+    badges!.fetchBadges();
   }
 
   void setupSync() {
@@ -107,6 +124,10 @@ class _ChatState extends State<Chat> {
         nextMessageIndex);
   }
 
+  bool loaded() {
+    return comments != null && badges != null && badges!.initialized();
+  }
+
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance!.addPostFrameCallback((_) {
@@ -114,12 +135,13 @@ class _ChatState extends State<Chat> {
         scrollController.jumpTo(scrollController.position.maxScrollExtent);
       }
     });
-    return comments != null
+    return loaded()
         ? ListView.builder(
             controller: scrollController,
             itemCount: activeComments()?.length ?? 0,
             itemBuilder: (BuildContext context, int index) {
-              return ChatMessage(comment: activeComments()?[index]);
+              return ChatMessage(
+                  comment: activeComments()?[index], badges: badges);
             })
         : const Center(
             child: Text("Loading"),
