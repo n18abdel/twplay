@@ -52,18 +52,20 @@ class _ChatState extends State<Chat> {
     } else {
       setState(() {
         forwardMessageIndex(playerPosition);
-        pause(playerPosition);
       });
     }
   }
 
   void seek(double playerPosition) {
     setState(() {
+      bool wasPlaying = playing;
+      if (wasPlaying) pause(playerPosition);
       if (playerPosition > chatTime) {
         forwardMessageIndex(playerPosition);
       } else {
         backwardMessageIndex(playerPosition);
       }
+      if (wasPlaying) play(playerPosition);
     });
   }
 
