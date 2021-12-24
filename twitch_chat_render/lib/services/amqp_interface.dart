@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import "package:dart_amqp/dart_amqp.dart";
+import 'package:flutter/services.dart';
 
 class AmqpInterface {
   static final Client client = Client();
@@ -20,13 +21,14 @@ class AmqpInterface {
     return completer.future;
   }
 
-  void setupLogSync() async {
+  void setupExit() async {
     Channel channel = await client.channel();
     Exchange exchange =
         await channel.exchange("topic_chat", ExchangeType.TOPIC);
-    Consumer consumer = await exchange.bindPrivateQueueConsumer(["sync.#"]);
+    Consumer consumer = await exchange.bindPrivateQueueConsumer(["exit"]);
     consumer.listen((message) {
-      print("${message.routingKey} - ${message.payloadAsString}");
+      client.close();
+      SystemNavigator.pop();
     });
   }
 
@@ -42,10 +44,6 @@ class AmqpInterface {
         callbacks[key]!(playerPosition);
       });
     });
+    setupExit();
   }
-}
-
-void main() async {
-  AmqpInterface interface = AmqpInterface();
-  interface.setupLogSync();
 }

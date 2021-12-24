@@ -1,6 +1,7 @@
 import pika
 from python_mpv_jsonipc import MPV
 import time
+import signal
 
 UPDATE_PERIOD = 60
 
@@ -50,11 +51,26 @@ def on_play_pause(property_name, new_value):
 
 @mpv.on_event("end-file")
 def on_ending(event_data):
+    print("Exiting")
+    channel.basic_publish(exchange='topic_chat',
+                          routing_key='exit',
+                          body="")
+    print("Sent exit message to chat")
     connection.close()
+    print("Closed AMQP connection")
     mpv.terminate()
+    print("Closed MPV")
 
 
 mpv.play("https://www.twitch.tv/videos/1235109843")
+
+
+def handler(signum, frame):
+    on_ending(None)
+    exit(0)
+
+
+signal.signal(signal.SIGINT, handler)
 
 t0 = time.time()
 while mpv.mpv_process.process.poll() is None:
