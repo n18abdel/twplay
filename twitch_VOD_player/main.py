@@ -2,8 +2,25 @@ import pika
 from python_mpv_jsonipc import MPV
 import time
 import signal
+import argparse
+import re
+import subprocess
+import tempfile
 
 UPDATE_PERIOD = 60
+
+parser = argparse.ArgumentParser(
+    description='Play a Twitch VOD with the chat using MPV and a chat renderer')
+parser.add_argument(
+    'url', help='a Twitch VOD url')
+args = parser.parse_args()
+
+vod_id = re.search("twitch.tv/videos/(\d+)", args.url).group(1)
+
+with tempfile.NamedTemporaryFile() as f:
+    subprocess.run(["TwitchDownloaderCLI", "-m",
+                    "ChatDownload", "--id", vod_id, "-o", f.name])
+    chat = f.readline()
 
 # Uses MPV that is in the PATH.
 mpv = MPV()
@@ -15,8 +32,6 @@ channel = connection.channel()
 
 channel.exchange_declare(exchange='topic_chat',
                          exchange_type='topic')
-with open("chat.json", "r") as f:
-    chat = f.readline()
 
 channel.basic_publish(exchange='topic_chat',
                       routing_key='json',
@@ -62,7 +77,7 @@ def on_ending(event_data):
     print("Closed MPV")
 
 
-mpv.play("https://www.twitch.tv/videos/1235109843")
+mpv.play(f"https://www.twitch.tv/videos/{vod_id}")
 
 
 def handler(signum, frame):
