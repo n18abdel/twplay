@@ -155,7 +155,7 @@ class _ChatState extends State<Chat> {
                   comment: activeComments()?[index], badges: badges);
             })
         : const Center(
-            child: Text("Loading"),
+            child: CircularProgressIndicator(),
           );
   }
 }
