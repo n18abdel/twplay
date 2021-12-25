@@ -17,7 +17,7 @@ class ChatMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      child: Text.rich(
+      child: SelectableText.rich(
         TextSpan(children: <InlineSpan>[
           ChatUser(badges: badges, comment: comment).from(context),
           ...comment!.message!.fragments!.map((fragment) {
