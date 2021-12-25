@@ -1,7 +1,7 @@
 import pika
 
 
-def init_amqp(chat):
+def init(chat):
     connection = pika.BlockingConnection(pika.ConnectionParameters(host="localhost"))
     return connection
 
