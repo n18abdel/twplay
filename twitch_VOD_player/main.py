@@ -26,6 +26,7 @@ player = Player()
 player.on_seek(partial(topics.seek, amqp.new_channel(connection)))
 player.on_play(partial(topics.play, amqp.new_channel(connection)))
 player.on_pause(partial(topics.pause, amqp.new_channel(connection)))
+player.on_speed_change(partial(topics.speed, amqp.new_channel(connection)))
 player.on_end_of_file(
     partial(utils.exit_callback, connection, amqp.new_channel(connection))
 )

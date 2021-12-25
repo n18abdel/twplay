@@ -43,6 +43,11 @@ class Player:
             if self.current_pos():
                 func(self.current_pos())
 
+    def on_speed_change(self, func: Callable[[float], None]) -> None:
+        @self._mpv.property_observer("speed")
+        def callback(property_name: str, speed: float) -> None:
+            func(speed)
+
     def on_end_of_file(self, func: Callable[["Player"], None]) -> None:
         @self._mpv.on_event("end-file")
         def callback(event_data: dict) -> None:
