@@ -3,6 +3,7 @@ from amqp import publish
 
 def json(channel, chat):
     publish(channel, "json", chat)
+    channel.close()
 
 
 def seek(channel, pos):
