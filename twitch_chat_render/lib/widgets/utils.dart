@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class Utils {
@@ -12,11 +13,16 @@ class Utils {
         .height;
   }
 
-  static Widget emoteWrapper(
-      {required BuildContext context, required Widget emote}) {
-    return Container(
-        margin: const EdgeInsets.only(top: 4),
-        height: 1.5 * Utils.heightOfText(context: context),
-        child: emote);
+  static WidgetSpan emoteWrapper(
+      {required BuildContext context, required String url}) {
+    return WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: Container(
+            margin: const EdgeInsets.only(top: 4),
+            height: 1.5 * Utils.heightOfText(context: context),
+            child: CachedNetworkImage(
+              placeholder: (context, url) => const CircularProgressIndicator(),
+              imageUrl: url,
+            )));
   }
 }

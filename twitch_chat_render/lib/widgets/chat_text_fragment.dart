@@ -1,12 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/bttv_emotes.dart';
 import 'package:twitch_chat_render/widgets/utils.dart';
 
-class ChatTextFragment extends StatelessWidget {
-  const ChatTextFragment({Key? key, required this.fragment, this.streamer})
-      : super(key: key);
+class ChatTextFragment {
+  const ChatTextFragment({required this.fragment, this.streamer});
 
   final Streamer? streamer;
   final String fragment;
@@ -28,8 +26,7 @@ class ChatTextFragment extends StatelessWidget {
     return tokens;
   }
 
-  @override
-  Widget build(BuildContext context) {
+  TextSpan from(BuildContext context) {
     List<String> tokens = tokenize(fragment);
     List<InlineSpan> spans = [];
     for (var token in tokens) {
@@ -40,15 +37,9 @@ class ChatTextFragment extends StatelessWidget {
             style: TextStyle(
                 fontWeight: token.startsWith("@") ? FontWeight.bold : null)));
       } else {
-        spans.add(WidgetSpan(
-            child: Utils.emoteWrapper(
-                context: context,
-                emote: CachedNetworkImage(
-                    placeholder: (context, url) =>
-                        const CircularProgressIndicator(),
-                    imageUrl: url))));
+        spans.add(Utils.emoteWrapper(context: context, url: url));
       }
     }
-    return Text.rich(TextSpan(children: spans));
+    return TextSpan(children: spans);
   }
 }
