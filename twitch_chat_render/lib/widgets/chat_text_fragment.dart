@@ -37,7 +37,7 @@ class ChatTextFragment {
             style: TextStyle(
                 fontWeight: token.startsWith("@") ? FontWeight.bold : null)));
       } else {
-        spans.add(Utils.emoteWrapper(context: context, url: url));
+        spans.add(Utils.emoteWrapper(context: context, url: url, name: token));
       }
     }
     return TextSpan(children: spans);

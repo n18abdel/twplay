@@ -23,7 +23,8 @@ class ChatMessage extends StatelessWidget {
           ...comment!.message!.fragments!.map((fragment) {
             return fragment.emoticon == null
                 ? ChatTextFragment(fragment: fragment.text!).from(context)
-                : ChatEmote(emoticon: fragment.emoticon).from(context);
+                : ChatEmote(emoticon: fragment.emoticon, name: fragment.text!)
+                    .from(context);
           }),
         ]),
       ),
