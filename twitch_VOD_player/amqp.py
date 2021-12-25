@@ -1,7 +1,7 @@
 import pika
 
 
-def init(chat):
+def init():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host="localhost"))
     return connection
 
