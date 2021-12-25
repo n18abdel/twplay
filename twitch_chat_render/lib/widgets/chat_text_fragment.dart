@@ -1,7 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/bttv_emotes.dart';
 import 'package:twitch_chat_render/widgets/utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ChatTextFragment {
   const ChatTextFragment({required this.fragment, this.streamer});
@@ -31,11 +33,22 @@ class ChatTextFragment {
     List<InlineSpan> spans = [];
     for (var token in tokens) {
       String? url = BTTVEmotes(streamer: streamer).getDownloadUrl(name: token);
-      if (url == null) {
+      bool isText = url == null;
+      if (isText) {
+        Uri? uri = Uri.tryParse(token);
+        bool isUrl =
+            uri != null && uri.hasAbsolutePath && uri.scheme.startsWith('http');
+        bool isMention = token.startsWith("@");
         spans.add(TextSpan(
+            recognizer: isUrl
+                ? (TapGestureRecognizer()
+                  ..onTap = () async => await launch('token'))
+                : null,
             text: token,
             style: TextStyle(
-                fontWeight: token.startsWith("@") ? FontWeight.bold : null)));
+                color: isUrl ? Colors.blue : null,
+                decoration: isUrl ? TextDecoration.underline : null,
+                fontWeight: isMention ? FontWeight.bold : null)));
       } else {
         spans.add(Utils.emoteWrapper(context: context, url: url, name: token));
       }
