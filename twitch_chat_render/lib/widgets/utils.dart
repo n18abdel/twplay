@@ -11,4 +11,12 @@ class Utils {
         .size
         .height;
   }
+
+  static Widget emoteWrapper(
+      {required BuildContext context, required Widget emote}) {
+    return Container(
+        margin: const EdgeInsets.only(top: 4),
+        height: 1.5 * Utils.heightOfText(context: context),
+        child: emote);
+  }
 }
