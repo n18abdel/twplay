@@ -17,7 +17,7 @@ def setup_exit_handler(callback):
 
 
 def parse_vod_id(args):
-    return re.search("twitch.tv/videos/(\d+)", args.url).group(1)
+    return re.search(r"twitch.tv/videos/(\d+)", args.url).group(1)
 
 
 def download_chat(vod_id):
