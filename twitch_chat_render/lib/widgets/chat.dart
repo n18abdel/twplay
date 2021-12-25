@@ -26,6 +26,7 @@ class _ChatState extends State<Chat> {
   Duration updatePeriod = const Duration(milliseconds: 300);
   Timer? timer;
   double chatTime = 0;
+  double chatSpeed = 0;
   bool playing = false;
   ScrollController scrollController = ScrollController();
 
@@ -37,6 +38,7 @@ class _ChatState extends State<Chat> {
   }
 
   void play(double playerPosition) {
+    print("play - chat $chatTime player $playerPosition");
     playing = true;
     timer = Timer.periodic(updatePeriod, (Timer timer) {
       if (comments != null) {
@@ -48,11 +50,14 @@ class _ChatState extends State<Chat> {
   }
 
   void pause(double playerPosition) {
+    print("pause - chat $chatTime player $playerPosition");
+    print("index $nextMessageIndex");
     playing = false;
     timer?.cancel();
   }
 
   void adjustTimer(double playerPosition) {
+    print("timer - chat $chatTime player $playerPosition");
     if (playing) {
       pause(playerPosition);
       play(playerPosition);
@@ -63,7 +68,18 @@ class _ChatState extends State<Chat> {
     }
   }
 
+  void adjustSpeed(double playerSpeed) {
+    print("speed - chat $chatSpeed player $playerSpeed");
+    setState(() {
+      bool wasPlaying = playing;
+      if (wasPlaying) pause(chatTime);
+      chatSpeed = playerSpeed;
+      if (wasPlaying) play(chatTime);
+    });
+  }
+
   void seek(double playerPosition) {
+    print("seek - chat $chatTime player $playerPosition");
     setState(() {
       bool wasPlaying = playing;
       if (wasPlaying) pause(playerPosition);
@@ -77,7 +93,9 @@ class _ChatState extends State<Chat> {
   }
 
   double elapsedTimerDuration() {
-    return timer == null ? 0 : timer!.tick * updatePeriod.inMilliseconds / 1000;
+    return timer == null
+        ? 0
+        : chatSpeed * timer!.tick * updatePeriod.inMilliseconds / 1000;
   }
 
   void forwardMessageIndex(double playerPosition) {
@@ -128,8 +146,13 @@ class _ChatState extends State<Chat> {
   }
 
   void setupSync() {
-    AmqpInterface().setupSync(
-        {"play": play, "pause": pause, "timer": adjustTimer, "seek": seek});
+    AmqpInterface().setupSync({
+      "play": play,
+      "pause": pause,
+      "timer": adjustTimer,
+      "seek": seek,
+      "speed": adjustSpeed
+    });
   }
 
   List<Comment>? activeComments() {
