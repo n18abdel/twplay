@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/amqp_interface.dart';
+import 'package:twitch_chat_render/services/bttv_emotes.dart';
 import 'package:twitch_chat_render/services/twitch_badges.dart';
 import 'package:twitch_chat_render/widgets/chat_message.dart';
 
@@ -18,6 +19,7 @@ class _ChatState extends State<Chat> {
   Streamer? streamer;
   List<Comment>? comments;
   TwitchBadges? badges;
+  BTTVEmotes? bttvEmotes;
   int nextMessageIndex = 0;
   Duration updatePeriod = const Duration(milliseconds: 300);
   Timer? timer;
@@ -103,12 +105,18 @@ class _ChatState extends State<Chat> {
       streamer = chat.streamer;
       comments = chat.comments;
       fetchBadges();
+      fetchEmotes();
     });
   }
 
   void fetchBadges() async {
     badges = TwitchBadges(streamer: streamer);
     badges!.fetchBadges();
+  }
+
+  void fetchEmotes() async {
+    bttvEmotes = BTTVEmotes(streamer: streamer);
+    bttvEmotes!.fetchEmotes();
   }
 
   void setupSync() {
@@ -125,7 +133,10 @@ class _ChatState extends State<Chat> {
   }
 
   bool loaded() {
-    return comments != null && badges != null && badges!.initialized();
+    return comments != null &&
+        badges != null &&
+        badges!.initialized() &&
+        bttvEmotes!.initialized();
   }
 
   @override
