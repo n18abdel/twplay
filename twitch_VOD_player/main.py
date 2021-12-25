@@ -15,7 +15,7 @@ parser.add_argument("url", help="a Twitch VOD url")
 args = parser.parse_args()
 
 
-vod_id = utils.parse_vod_id(args)
+vod_id = utils.parse_vod_id(args.url)
 chat = utils.download_chat(vod_id)
 
 connection = amqp.init()
