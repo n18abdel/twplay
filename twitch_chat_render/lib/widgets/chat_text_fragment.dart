@@ -1,7 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/bttv_emotes.dart';
+import 'package:twitch_chat_render/services/twitch_cheer_emotes.dart';
 import 'package:twitch_chat_render/widgets/utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -34,7 +36,25 @@ class ChatTextFragment {
     for (var token in tokens) {
       String? url = BTTVEmotes(streamer: streamer).getDownloadUrl(name: token);
       bool isText = url == null;
-      if (isText) {
+      bool isBTTVEmote = url != null;
+      if (isBTTVEmote) {
+        spans.add(Utils.emoteWrapper(context: context, url: url, name: token));
+      } else if (TwitchCheerEmotes(streamer: streamer).isCheer(name: token)) {
+        spans.addAll([
+          Utils.emoteWrapper(
+              context: context,
+              url: TwitchCheerEmotes(streamer: streamer)
+                  .getDownloadUrl(name: token),
+              name: token),
+          TextSpan(
+              text:
+                  " ${TwitchCheerEmotes(streamer: streamer).getAmount(name: token)}",
+              style: TextStyle(
+                  color: HexColor(TwitchCheerEmotes(streamer: streamer)
+                      .getColor(name: token)),
+                  fontWeight: FontWeight.bold))
+        ]);
+      } else if (isText) {
         Uri? uri = Uri.tryParse(token);
         bool isUrl =
             uri != null && uri.hasAbsolutePath && uri.scheme.startsWith('http');
@@ -49,8 +69,6 @@ class ChatTextFragment {
                 color: isUrl ? Colors.blue : null,
                 decoration: isUrl ? TextDecoration.underline : null,
                 fontWeight: isMention ? FontWeight.bold : null)));
-      } else {
-        spans.add(Utils.emoteWrapper(context: context, url: url, name: token));
       }
     }
     return TextSpan(children: spans);

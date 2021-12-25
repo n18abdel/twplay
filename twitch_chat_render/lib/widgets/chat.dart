@@ -5,6 +5,7 @@ import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/amqp_interface.dart';
 import 'package:twitch_chat_render/services/bttv_emotes.dart';
 import 'package:twitch_chat_render/services/twitch_badges.dart';
+import 'package:twitch_chat_render/services/twitch_cheer_emotes.dart';
 import 'package:twitch_chat_render/widgets/chat_message.dart';
 
 class Chat extends StatefulWidget {
@@ -20,6 +21,7 @@ class _ChatState extends State<Chat> {
   List<Comment>? comments;
   TwitchBadges? badges;
   BTTVEmotes? bttvEmotes;
+  TwitchCheerEmotes? cheerEmotes;
   int nextMessageIndex = 0;
   Duration updatePeriod = const Duration(milliseconds: 300);
   Timer? timer;
@@ -106,6 +108,7 @@ class _ChatState extends State<Chat> {
       comments = chat.comments;
       fetchBadges();
       fetchEmotes();
+      fetchCheerEmotes();
     });
   }
 
@@ -117,6 +120,11 @@ class _ChatState extends State<Chat> {
   void fetchEmotes() async {
     bttvEmotes = BTTVEmotes(streamer: streamer);
     bttvEmotes!.fetchEmotes();
+  }
+
+  void fetchCheerEmotes() async {
+    cheerEmotes = TwitchCheerEmotes(streamer: streamer);
+    cheerEmotes!.fetchEmotes();
   }
 
   void setupSync() {
@@ -136,7 +144,10 @@ class _ChatState extends State<Chat> {
     return comments != null &&
         badges != null &&
         badges!.initialized() &&
-        bttvEmotes!.initialized();
+        bttvEmotes != null &&
+        bttvEmotes!.initialized() &&
+        cheerEmotes != null &&
+        cheerEmotes!.initialized();
   }
 
   @override
