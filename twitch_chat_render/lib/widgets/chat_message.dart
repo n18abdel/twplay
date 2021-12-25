@@ -15,14 +15,28 @@ class ChatMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      decoration: BoxDecoration(
+        color: comment!.message!.userNoticeParams!.msgId != null
+            ? Colors.purple.withOpacity(0.5)
+            : null,
+      ),
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       child: SelectableText.rich(
         TextSpan(children: <InlineSpan>[
           ChatUser(badges: badges, comment: comment).from(context),
           ...comment!.message!.fragments!.map((fragment) {
             return fragment.emoticon == null
-                ? ChatTextFragment(fragment: fragment.text!).from(context)
+                ? ChatTextFragment(
+                        streamer: streamer,
+                        fragment: comment!.message!.userNoticeParams != null &&
+                                comment!.message!.userNoticeParams!.msgId !=
+                                    null &&
+                                comment!.message!.userNoticeParams!.msgId! ==
+                                    "highlighted-message"
+                            ? comment!.message!.body!
+                            : fragment.text!)
+                    .from(context)
                 : ChatEmote(emoticon: fragment.emoticon, name: fragment.text!)
                     .from(context);
           }),

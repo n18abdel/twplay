@@ -152,7 +152,9 @@ class _ChatState extends State<Chat> {
             itemCount: activeComments()?.length ?? 0,
             itemBuilder: (BuildContext context, int index) {
               return ChatMessage(
-                  comment: activeComments()?[index], badges: badges);
+                  streamer: streamer,
+                  comment: activeComments()?[index],
+                  badges: badges);
             })
         : const Center(
             child: CircularProgressIndicator(),
