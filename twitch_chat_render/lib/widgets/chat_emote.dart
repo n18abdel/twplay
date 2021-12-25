@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:twitch_chat_render/widgets/utils.dart';
 
-class ChatEmote extends StatelessWidget {
-  const ChatEmote({Key? key, this.emoticon}) : super(key: key);
+class ChatEmote {
+  const ChatEmote({this.emoticon});
 
   final dynamic emoticon;
 
-  @override
-  Widget build(BuildContext context) {
-    return CachedNetworkImage(
-      placeholder: (context, url) => const CircularProgressIndicator(),
-      imageUrl:
-          'https://static-cdn.jtvnw.net/emoticons/v2/${emoticon["emoticon_id"]}/default/dark/2.0',
-    );
+  WidgetSpan from(BuildContext context) {
+    return Utils.emoteWrapper(
+        context: context,
+        url:
+            'https://static-cdn.jtvnw.net/emoticons/v2/${emoticon["emoticon_id"]}/default/dark/2.0');
   }
 }
