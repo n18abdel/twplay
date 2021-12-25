@@ -1,10 +1,6 @@
 from python_mpv_jsonipc import MPV
 
 
-def is_running(mpv):
-    return mpv.mpv_process.process.poll() is None
-
-
 class Player:
     def __init__(self) -> None:
         self._mpv = MPV()  # Uses MPV that is in the PATH.
