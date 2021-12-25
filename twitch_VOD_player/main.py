@@ -1,7 +1,7 @@
 import argparse
 from functools import partial
 
-from amqp import init_amqp
+from amqp import init_amqp, new_channel
 from player import Player
 from topics import pause, play, seek
 from utils import (
@@ -25,18 +25,18 @@ args = parser.parse_args()
 vod_id = parse_vod_id(args)
 chat = download_chat(vod_id)
 
-connection, channel = init_amqp(chat)
+connection = init_amqp(chat)
 
-send_chat_file(channel, chat)
+send_chat_file(new_channel(connection), chat)
 
 player = Player()
-player.on_seek(partial(seek, channel))
-player.on_play(partial(play, channel))
-player.on_pause(partial(pause, channel))
-player.on_end_of_file(partial(exit_callback, connection, channel))
+player.on_seek(partial(seek, new_channel(connection)))
+player.on_play(partial(play, new_channel(connection)))
+player.on_pause(partial(pause, new_channel(connection)))
+player.on_end_of_file(partial(exit_callback, connection, new_channel(connection)))
 
 player.play(f"https://www.twitch.tv/videos/{vod_id}")
 
-setup_exit_handler(partial(exit_callback, connection, channel, player))
+setup_exit_handler(partial(exit_callback, connection, new_channel(connection), player))
 
-timer_loop(player, channel, period=UPDATE_PERIOD)
+timer_loop(player, new_channel(connection), period=UPDATE_PERIOD)

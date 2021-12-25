@@ -3,11 +3,13 @@ import pika
 
 def init_amqp(chat):
     connection = pika.BlockingConnection(pika.ConnectionParameters(host="localhost"))
+    return connection
+
+
+def new_channel(connection):
     channel = connection.channel()
-
     channel.exchange_declare(exchange="topic_chat", exchange_type="topic")
-
-    return connection, channel
+    return channel
 
 
 def publish(channel, routing_key, body):
