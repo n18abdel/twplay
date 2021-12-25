@@ -18,7 +18,7 @@ args = parser.parse_args()
 vod_id = utils.parse_vod_id(args)
 chat = utils.download_chat(vod_id)
 
-connection = amqp.init(chat)
+connection = amqp.init()
 
 utils.send_chat_file(amqp.new_channel(connection), chat)
 
