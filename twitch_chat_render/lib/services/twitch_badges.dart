@@ -36,4 +36,10 @@ class TwitchBadges {
     return (subBadges?[name] ?? globalBadges?[name])["versions"][version]
         ["image_url_2x"];
   }
+
+  String getTitle({name, version}) {
+    while (globalBadges == null || subBadges == null) {}
+    return (subBadges?[name] ?? globalBadges?[name])["versions"][version]
+        ["title"];
+  }
 }
