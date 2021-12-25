@@ -37,6 +37,9 @@ player.on_end_of_file(partial(exit_callback, connection, new_channel(connection)
 
 player.play(f"https://www.twitch.tv/videos/{vod_id}")
 
-setup_exit_handler(partial(exit_callback, connection, new_channel(connection), player))
 
-timer_loop(player, new_channel(connection), period=UPDATE_PERIOD)
+timer = timer_loop(player, new_channel(connection), period=UPDATE_PERIOD)
+
+setup_exit_handler(
+    partial(exit_callback, connection, new_channel(connection), player, timer)
+)

@@ -2,7 +2,7 @@ import re
 import signal
 import subprocess
 import tempfile
-import time
+import threading
 
 from player import Player
 from topics import chatExit, json, timer
@@ -34,17 +34,18 @@ def send_chat_file(channel, chat):
 
 
 def timer_loop(player: Player, channel, period):
-    t0 = time.time()
-    while player.is_running():
-        t1 = time.time()
-        if (t1 - t0) >= period:
-            t0 = t1
-            if player.current_pos():
-                timer(channel, player.current_pos())
+    def timer_callback():
+        if player.current_pos():
+            timer(channel, player.current_pos())
+
+    t = threading.Timer(period, timer_callback)
+    t.start()
+    return t
 
 
-def exit_callback(connection, channel, player: Player):
+def exit_callback(connection, channel, player: Player, timer):
     print("Exiting")
+    timer.cancel()
     chatExit(channel)
     print("Sent exit message to chat")
     connection.close()
