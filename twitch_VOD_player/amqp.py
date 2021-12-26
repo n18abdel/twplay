@@ -5,7 +5,9 @@ from pika.adapters.blocking_connection import BlockingChannel
 
 
 def init() -> Tuple[pika.BlockingConnection, BlockingChannel]:
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host="localhost"))
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(host="localhost", heartbeat=0)
+    )
     channel = connection.channel()
     channel.exchange_declare(exchange="topic_chat", exchange_type="topic")
     return connection, channel
