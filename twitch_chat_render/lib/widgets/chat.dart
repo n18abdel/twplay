@@ -29,6 +29,7 @@ class _ChatState extends State<Chat> {
   Timer? timer;
   double chatTime = 0;
   double chatSpeed = 1;
+  double chatOffset = 0;
   bool playing = false;
   bool initStatus = false;
   ScrollController scrollController = ScrollController();
@@ -38,7 +39,13 @@ class _ChatState extends State<Chat> {
     super.initState();
     retrieveComments();
     setupSync();
-    context.read<AppStatus>().addListener(() => seek(chatTime));
+    context.read<AppStatus>().addListener(() {
+      var newOffset = context.read<AppStatus>().offset;
+      if (newOffset != chatOffset) {
+        chatOffset = newOffset;
+        seek(chatTime);
+      }
+    });
   }
 
   void play(double playerPosition) {
@@ -107,7 +114,7 @@ class _ChatState extends State<Chat> {
       chatTime = startPosition + elapsedTimerDuration();
       while (nextMessageIndex < comments!.length - 1 &&
           comments![nextMessageIndex].contentOffsetSeconds! <
-              chatTime + context.read<AppStatus>().offset) {
+              chatTime + chatOffset) {
         nextMessageIndex++;
       }
     }
@@ -118,7 +125,7 @@ class _ChatState extends State<Chat> {
       chatTime = startPosition + elapsedTimerDuration();
       while (nextMessageIndex > 0 &&
           comments![nextMessageIndex - 1].contentOffsetSeconds! >
-              chatTime + context.read<AppStatus>().offset) {
+              chatTime + chatOffset) {
         nextMessageIndex--;
       }
     }
