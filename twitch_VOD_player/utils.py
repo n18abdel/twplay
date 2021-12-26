@@ -56,6 +56,7 @@ def setup_timer_loop(
     def timer_callback() -> None:
         if player.current_pos():
             topics.timer(channel, str(player.current_pos()))
+        threading.Timer(period, timer_callback).start()
 
     t = threading.Timer(period, timer_callback)
     t.start()
