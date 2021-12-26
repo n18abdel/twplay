@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/amqp_interface.dart';
+import 'package:twitch_chat_render/services/app_status.dart';
 import 'package:twitch_chat_render/services/bttv_emotes.dart';
 import 'package:twitch_chat_render/services/twitch_badges.dart';
 import 'package:twitch_chat_render/services/twitch_cheer_emotes.dart';
@@ -28,6 +30,7 @@ class _ChatState extends State<Chat> {
   double chatTime = 0;
   double chatSpeed = 1;
   bool playing = false;
+  bool initStatus = false;
   ScrollController scrollController = ScrollController();
 
   @override
@@ -47,6 +50,7 @@ class _ChatState extends State<Chat> {
         });
       }
     });
+    Provider.of<AppStatus>(context, listen: false).play();
   }
 
   void pause(double playerPosition) {
@@ -54,6 +58,7 @@ class _ChatState extends State<Chat> {
     print("index $nextMessageIndex");
     playing = false;
     timer?.cancel();
+    Provider.of<AppStatus>(context, listen: false).pause();
   }
 
   void adjustTimer(double playerPosition) {
@@ -76,6 +81,7 @@ class _ChatState extends State<Chat> {
       chatSpeed = playerSpeed;
       if (wasPlaying) play(chatTime);
     });
+    Provider.of<AppStatus>(context, listen: false).setSpeed(playerSpeed);
   }
 
   void seek(double playerPosition) {
@@ -164,13 +170,21 @@ class _ChatState extends State<Chat> {
   }
 
   bool loaded() {
-    return comments != null &&
-        badges != null &&
-        badges!.initialized() &&
-        bttvEmotes != null &&
-        bttvEmotes!.initialized() &&
-        cheerEmotes != null &&
-        cheerEmotes!.initialized();
+    if (!initStatus) {
+      initStatus = comments != null &&
+          badges != null &&
+          badges!.initialized() &&
+          bttvEmotes != null &&
+          bttvEmotes!.initialized() &&
+          cheerEmotes != null &&
+          cheerEmotes!.initialized();
+      if (initStatus) {
+        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+          Provider.of<AppStatus>(context, listen: false).didLoad();
+        });
+      }
+    }
+    return initStatus;
   }
 
   @override
