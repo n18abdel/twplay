@@ -195,15 +195,19 @@ class _ChatState extends State<Chat> {
       }
     });
     return loaded()
-        ? ListView.builder(
-            controller: scrollController,
-            itemCount: activeComments()?.length ?? 0,
-            itemBuilder: (BuildContext context, int index) {
-              return ChatMessage(
-                  streamer: streamer,
-                  comment: activeComments()?[index],
-                  badges: badges);
-            })
+        ? ScrollConfiguration(
+            behavior:
+                ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            child: ListView.builder(
+                controller: scrollController,
+                itemCount: activeComments()?.length ?? 0,
+                itemBuilder: (BuildContext context, int index) {
+                  return ChatMessage(
+                      streamer: streamer,
+                      comment: activeComments()?[index],
+                      badges: badges);
+                }),
+          )
         : const Center(
             child: CircularProgressIndicator(),
           );
