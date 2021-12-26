@@ -1,12 +1,14 @@
-from typing import Union
+from typing import List, Union
 
 import pika
 from pika.adapters.blocking_connection import BlockingChannel
 
 
-def init() -> pika.BlockingConnection:
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host="localhost"))
-    return connection
+def init(n: int) -> List[pika.BlockingConnection]:
+    return [
+        pika.BlockingConnection(pika.ConnectionParameters(host="localhost"))
+        for i in range(n)
+    ]
 
 
 def new_channel(connection: pika.BlockingConnection) -> BlockingChannel:
