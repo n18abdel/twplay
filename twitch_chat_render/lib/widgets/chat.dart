@@ -26,7 +26,7 @@ class _ChatState extends State<Chat> {
   Duration updatePeriod = const Duration(milliseconds: 300);
   Timer? timer;
   double chatTime = 0;
-  double chatSpeed = 0;
+  double chatSpeed = 1;
   bool playing = false;
   ScrollController scrollController = ScrollController();
 
