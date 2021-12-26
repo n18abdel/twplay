@@ -7,7 +7,6 @@ from amqp import publish
 
 def json(channel: BlockingChannel, chat: Union[str, bytes]) -> None:
     publish(channel, "json", chat)
-    channel.close()
 
 
 def seek(channel: BlockingChannel, pos: str) -> None:
