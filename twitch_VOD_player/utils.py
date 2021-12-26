@@ -4,7 +4,7 @@ import subprocess
 import tempfile
 import threading
 from types import FrameType
-from typing import Any, Callable, Optional, Union
+from typing import Callable, List, Optional, Union
 
 from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
 
@@ -13,7 +13,7 @@ from player import Player
 
 
 def setup_exit_handler(callback: Callable[[], None]) -> None:
-    def handler(signum: int, frame: Optional[FrameType]) -> Any:
+    def handler(signum: int, frame: Optional[FrameType]) -> None:
         callback()
         exit(0)
 
@@ -63,7 +63,7 @@ def setup_timer_loop(
 
 
 def exit_callback(
-    connection: BlockingConnection,
+    connections: List[BlockingConnection],
     channel: BlockingChannel,
     player: Player,
     timer: threading.Timer,
@@ -72,7 +72,8 @@ def exit_callback(
     timer.cancel()
     topics.chatExit(channel)
     print("Sent exit message to chat")
-    connection.close()
-    print("Closed AMQP connection")
+    for connection in connections:
+        connection.close()
+    print("Closed AMQP connections")
     player.terminate()
     print("Closed MPV")
