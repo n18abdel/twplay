@@ -25,21 +25,21 @@ class ChatMessage extends StatelessWidget {
       child: SelectableText.rich(
         TextSpan(children: <InlineSpan>[
           ChatUser(badges: badges, comment: comment).from(context),
-          ...comment!.message!.fragments!.map((fragment) {
-            return fragment.emoticon == null
-                ? ChatTextFragment(
-                        streamer: streamer,
-                        fragment: comment!.message!.userNoticeParams != null &&
-                                comment!.message!.userNoticeParams!.msgId !=
-                                    null &&
-                                comment!.message!.userNoticeParams!.msgId! ==
-                                    "highlighted-message"
-                            ? comment!.message!.body!
-                            : fragment.text!)
-                    .from(context)
-                : ChatEmote(emoticon: fragment.emoticon, name: fragment.text!)
-                    .from(context);
-          }),
+          ...comment!.message!.fragments == null
+              ? [
+                  ChatTextFragment(
+                          streamer: streamer, fragment: comment!.message!.body!)
+                      .from(context)
+                ]
+              : comment!.message!.fragments!.map((fragment) {
+                  return fragment.emoticon == null
+                      ? ChatTextFragment(
+                              streamer: streamer, fragment: fragment.text!)
+                          .from(context)
+                      : ChatEmote(
+                              emoticon: fragment.emoticon, name: fragment.text!)
+                          .from(context);
+                }),
         ]),
       ),
     );
