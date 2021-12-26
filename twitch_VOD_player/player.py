@@ -15,7 +15,7 @@ class Player:
         return self._mpv.mpv_process.process.poll() is None
 
     def current_pos(self) -> Optional[str]:
-        return None if self._mpv.time_pos else str(self._mpv.time_pos)
+        return None if self._mpv.time_pos is None else str(self._mpv.time_pos)
 
     def play(self, url: str) -> None:
         self._mpv.play(url)
