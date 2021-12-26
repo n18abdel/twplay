@@ -38,6 +38,7 @@ class _ChatState extends State<Chat> {
     super.initState();
     retrieveComments();
     setupSync();
+    context.read<AppStatus>().addListener(() => seek(chatTime));
   }
 
   void play(double playerPosition) {
@@ -89,11 +90,8 @@ class _ChatState extends State<Chat> {
     setState(() {
       bool wasPlaying = playing;
       if (wasPlaying) pause(playerPosition);
-      if (playerPosition > chatTime) {
-        forwardMessageIndex(playerPosition);
-      } else {
-        backwardMessageIndex(playerPosition);
-      }
+      forwardMessageIndex(playerPosition);
+      backwardMessageIndex(playerPosition);
       if (wasPlaying) play(playerPosition);
     });
   }
@@ -104,21 +102,23 @@ class _ChatState extends State<Chat> {
         : chatSpeed * timer!.tick * updatePeriod.inMilliseconds / 1000;
   }
 
-  void forwardMessageIndex(double playerPosition) {
+  void forwardMessageIndex(double startPosition) {
     if (comments != null) {
-      chatTime = playerPosition + elapsedTimerDuration();
+      chatTime = startPosition + elapsedTimerDuration();
       while (nextMessageIndex < comments!.length - 1 &&
-          comments![nextMessageIndex].contentOffsetSeconds! < chatTime) {
+          comments![nextMessageIndex].contentOffsetSeconds! <
+              chatTime + context.read<AppStatus>().offset) {
         nextMessageIndex++;
       }
     }
   }
 
-  void backwardMessageIndex(double playerPosition) {
+  void backwardMessageIndex(double startPosition) {
     if (comments != null) {
-      chatTime = playerPosition + elapsedTimerDuration();
+      chatTime = startPosition + elapsedTimerDuration();
       while (nextMessageIndex > 0 &&
-          comments![nextMessageIndex - 1].contentOffsetSeconds! > chatTime) {
+          comments![nextMessageIndex - 1].contentOffsetSeconds! >
+              chatTime + context.read<AppStatus>().offset) {
         nextMessageIndex--;
       }
     }
