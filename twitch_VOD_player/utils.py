@@ -13,7 +13,7 @@ from player import Player
 
 
 def setup_exit_handler(callback: Callable[[], None]) -> None:
-    def handler(signum: signal._SIGNUM, frame: Optional[FrameType]) -> Any:
+    def handler(signum: int, frame: Optional[FrameType]) -> Any:
         callback()
         exit(0)
 
