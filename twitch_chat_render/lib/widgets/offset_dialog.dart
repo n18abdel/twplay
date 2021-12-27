@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:twitch_chat_render/services/app_status.dart';
+import 'package:twitch_chat_render/models/app_status.dart';
 
 class OffsetDialog extends StatelessWidget {
   const OffsetDialog({Key? key, required this.model}) : super(key: key);
@@ -25,13 +25,13 @@ class OffsetDialog extends StatelessWidget {
                     onPressed: () {
                       model.decOffset();
                     },
-                    icon: Icon(Icons.remove)),
+                    icon: const Icon(Icons.remove)),
                 Text('Offset: ${model.offset}s'),
                 IconButton(
                     onPressed: () {
                       model.incOffset();
                     },
-                    icon: Icon(Icons.add)),
+                    icon: const Icon(Icons.add)),
               ],
             ),
           ),

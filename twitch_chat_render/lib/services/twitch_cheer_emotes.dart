@@ -18,7 +18,7 @@ class TwitchCheerEmotes {
     return _instance;
   }
 
-  void fetchEmotes() async {
+  Future<void> fetchEmotes() async {
     Map response = jsonDecode((await http.get(
             Uri.parse(
                 "https://api.twitch.tv/kraken/bits/actions?channel_id=${streamer?.id}"),

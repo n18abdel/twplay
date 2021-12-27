@@ -18,7 +18,7 @@ class TwitchBadges {
     return _instance;
   }
 
-  void fetchBadges() async {
+  Future<void> fetchBadges() async {
     globalBadges ??= jsonDecode((await http.get(
             Uri.parse("https://badges.twitch.tv/v1/badges/global/display")))
         .body)["badge_sets"];

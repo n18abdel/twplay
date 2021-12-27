@@ -18,7 +18,7 @@ class BTTVEmotes {
     return _instance;
   }
 
-  void fetchEmotes() async {
+  Future<void> fetchEmotes() async {
     globalEmotes ??= {
       for (var emote in jsonDecode((await http.get(
               Uri.parse("https://api.betterttv.net/3/cached/emotes/global")))
