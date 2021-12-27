@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:twitch_chat_render/pages/home.dart';
+import 'package:provider/provider.dart';
+import 'package:twitch_chat_render/pages/chat.dart';
+import 'package:twitch_chat_render/pages/loading.dart';
+import 'package:twitch_chat_render/models/app_status.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,10 +13,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Twitch chat render',
-      theme: ThemeData.dark(),
-      home: const Home(),
+    return ChangeNotifierProvider(
+      create: (context) => AppStatus(),
+      child: MaterialApp(
+        title: 'Twitch chat render',
+        theme: ThemeData.dark(),
+        initialRoute: "/loading",
+        routes: {
+          "/chat": (_) => const ChatPage(),
+          "/loading": (_) => const LoadingPage()
+        },
+      ),
     );
   }
 }
