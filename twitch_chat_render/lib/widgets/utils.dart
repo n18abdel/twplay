@@ -34,7 +34,7 @@ class Utils {
         child: Column(
           children: [
             cachedNetworkImage(url.replaceRange(
-                url.lastIndexOf("2"), url.lastIndexOf("2") + 1, "3")),
+                url.lastIndexOf("1"), url.lastIndexOf("1") + 1, "3")),
             Text(name)
           ],
         ),

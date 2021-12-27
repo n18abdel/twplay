@@ -12,6 +12,6 @@ class ChatEmote {
         context: context,
         name: name,
         url:
-            'https://static-cdn.jtvnw.net/emoticons/v2/${emoticon["emoticon_id"]}/default/dark/2.0');
+            'https://static-cdn.jtvnw.net/emoticons/v2/${emoticon["emoticon_id"]}/default/dark/1.0');
   }
 }

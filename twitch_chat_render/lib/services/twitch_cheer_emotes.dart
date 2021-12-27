@@ -32,7 +32,7 @@ class TwitchCheerEmotes {
         emoteToken["prefix"]: {
           for (var tierToken in emoteToken["tiers"])
             tierToken["min_bits"]: {
-              "url": tierToken["images"]["dark"]["animated"]["2"],
+              "url": tierToken["images"]["dark"]["animated"]["1"],
               "color": tierToken["color"]
             }
         }

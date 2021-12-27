@@ -34,7 +34,7 @@ class TwitchBadges {
   String getDownloadUrl({name, version}) {
     while (globalBadges == null || subBadges == null) {}
     return (subBadges?[name] ?? globalBadges?[name])["versions"][version]
-        ["image_url_2x"];
+        ["image_url_1x"];
   }
 
   String getTitle({name, version}) {
