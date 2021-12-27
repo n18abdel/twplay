@@ -23,7 +23,7 @@ class BTTVEmotes {
       for (var emote in jsonDecode((await http.get(
               Uri.parse("https://api.betterttv.net/3/cached/emotes/global")))
           .body))
-        emote["code"]: "https://cdn.betterttv.net/emote/${emote["id"]}/2x"
+        emote["code"]: "https://cdn.betterttv.net/emote/${emote["id"]}/1x"
     };
     Map channelResponse = jsonDecode((await http.get(Uri.parse(
             "https://api.betterttv.net/3/cached/users/twitch/${streamer?.id}")))
@@ -33,7 +33,7 @@ class BTTVEmotes {
         ...channelResponse["sharedEmotes"] ?? [],
         ...channelResponse["channelEmotes"] ?? []
       ])
-        emote["code"]: "https://cdn.betterttv.net/emote/${emote["id"]}/2x"
+        emote["code"]: "https://cdn.betterttv.net/emote/${emote["id"]}/1x"
     };
   }
 
