@@ -27,4 +27,4 @@ def retrieve_playable_url(vod_id: Union[int, str]) -> str:
 
 
 def launch_chat_renderer() -> None:
-    subprocess.run(["open", "twitch_chat_render.app"])
+    subprocess.run(["open", "-a", "twitch_chat_render"])
