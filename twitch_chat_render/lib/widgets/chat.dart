@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/amqp_interface.dart';
 import 'package:twitch_chat_render/models/app_status.dart';
@@ -18,7 +19,6 @@ class Chat extends StatefulWidget {
 }
 
 class _ChatState extends State<Chat> {
-  final int _maxMessageCount = 200;
   Streamer? get streamer =>
       Provider.of<AppStatus>(context, listen: false).streamer;
   List<Comment>? get comments =>
@@ -32,13 +32,16 @@ class _ChatState extends State<Chat> {
   int nextMessageIndex = 0;
   Duration updatePeriod = const Duration(milliseconds: 300);
   Timer? timer;
-  double chatTime = 0;
+  Stopwatch stopwatch = Stopwatch();
+  double chatInitPosition = 0;
   double chatSpeed = 1;
+  double get chatTime =>
+      chatInitPosition + chatSpeed * stopwatch.elapsed.inMilliseconds / 1000;
   double chatOffset = 0;
   bool get playing => Provider.of<AppStatus>(context, listen: false).playing;
   bool get initStatus =>
       Provider.of<AppStatus>(context, listen: false).initStatus;
-  ScrollController scrollController = ScrollController();
+  ItemScrollController itemScrollController = ItemScrollController();
 
   @override
   void initState() {
@@ -55,13 +58,17 @@ class _ChatState extends State<Chat> {
 
   void play(double playerPosition) {
     context.read<AppStatus>().play();
-    chatTime = playerPosition;
+    chatInitPosition = playerPosition;
+    stopwatch
+      ..reset()
+      ..start();
     timer = Timer.periodic(updatePeriod, (Timer timer) {
       if (comments != null) {
-        setState(() {
-          chatTime += chatSpeed * updatePeriod.inMilliseconds / 1000;
-          forwardMessageIndex(playerPosition);
-        });
+        int oldNextMessageIndex = nextMessageIndex;
+        forwardMessageIndex();
+        if (nextMessageIndex != oldNextMessageIndex) {
+          setState(() {});
+        }
       }
     });
   }
@@ -69,54 +76,47 @@ class _ChatState extends State<Chat> {
   void pause(double playerPosition) {
     context.read<AppStatus>().pause();
     timer?.cancel();
+    stopwatch.stop();
   }
 
   void adjustTimer(double playerPosition) {
-    if (playing) {
-      pause(playerPosition);
-      play(playerPosition);
-    } else {
-      setState(() {
-        forwardMessageIndex(playerPosition);
-      });
-    }
+    chatInitPosition = playerPosition;
+    stopwatch.reset();
   }
 
   void adjustSpeed(double playerSpeed) {
-    setState(() {
-      bool wasPlaying = playing;
-      if (wasPlaying) pause(chatTime);
-      chatSpeed = playerSpeed;
-      if (wasPlaying) play(chatTime);
-    });
+    adjustTimer(chatTime);
+    chatSpeed = playerSpeed;
     Provider.of<AppStatus>(context, listen: false).setSpeed(playerSpeed);
   }
 
   void seek(double playerPosition) {
-    setState(() {
-      bool wasPlaying = playing;
-      if (wasPlaying) pause(playerPosition);
-      forwardMessageIndex(playerPosition);
-      backwardMessageIndex(playerPosition);
-      if (wasPlaying) play(playerPosition);
-    });
+    int oldNextMessageIndex = nextMessageIndex;
+    bool wasPlaying = playing;
+    if (wasPlaying) pause(playerPosition);
+    forwardMessageIndex();
+    backwardMessageIndex();
+    if (wasPlaying) play(playerPosition);
+    if (nextMessageIndex != oldNextMessageIndex) {
+      setState(() {});
+    }
   }
 
-  void forwardMessageIndex(double startPosition) {
+  void forwardMessageIndex() {
     if (comments != null) {
+      double lookupTime = chatTime + chatOffset;
       while (nextMessageIndex < comments!.length - 1 &&
-          comments![nextMessageIndex].contentOffsetSeconds! <
-              chatTime + chatOffset) {
+          comments![nextMessageIndex].contentOffsetSeconds! < lookupTime) {
         nextMessageIndex++;
       }
     }
   }
 
-  void backwardMessageIndex(double startPosition) {
+  void backwardMessageIndex() {
     if (comments != null) {
+      double lookupTime = chatTime + chatOffset;
       while (nextMessageIndex > 0 &&
-          comments![nextMessageIndex - 1].contentOffsetSeconds! >
-              chatTime + chatOffset) {
+          comments![nextMessageIndex - 1].contentOffsetSeconds! > lookupTime) {
         nextMessageIndex--;
       }
     }
@@ -132,31 +132,27 @@ class _ChatState extends State<Chat> {
     });
   }
 
-  List<Comment>? activeComments() {
-    return comments?.sublist(
-        (nextMessageIndex - _maxMessageCount) >= 0
-            ? (nextMessageIndex - _maxMessageCount)
-            : 0,
-        nextMessageIndex);
-  }
-
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance!.addPostFrameCallback((_) {
-      if (scrollController.hasClients) {
-        scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      if (itemScrollController.isAttached) {
+        itemScrollController.jumpTo(index: nextMessageIndex, alignment: 1);
       }
     });
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-      child: ListView.builder(
-          controller: scrollController,
-          itemCount: activeComments()?.length ?? 0,
+      child: ScrollablePositionedList.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
+          itemScrollController: itemScrollController,
+          itemCount: comments!.length,
           itemBuilder: (BuildContext context, int index) {
-            return ChatMessage(
-                streamer: streamer,
-                comment: activeComments()?[index],
-                badges: badges);
+            return Visibility(
+              visible: index < nextMessageIndex,
+              child: ChatMessage(
+                  streamer: streamer,
+                  comment: comments![index],
+                  badges: badges),
+            );
           }),
     );
   }
