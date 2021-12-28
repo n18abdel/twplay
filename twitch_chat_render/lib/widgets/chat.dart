@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:indexed_list_view/indexed_list_view.dart';
 import 'package:provider/provider.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/amqp_interface.dart';
 import 'package:twitch_chat_render/models/app_status.dart';
@@ -41,7 +41,7 @@ class _ChatState extends State<Chat> {
   bool get playing => Provider.of<AppStatus>(context, listen: false).playing;
   bool get initStatus =>
       Provider.of<AppStatus>(context, listen: false).initStatus;
-  ItemScrollController itemScrollController = ItemScrollController();
+  IndexedScrollController controller = IndexedScrollController();
 
   @override
   void initState() {
@@ -134,26 +134,30 @@ class _ChatState extends State<Chat> {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      if (itemScrollController.isAttached) {
-        itemScrollController.jumpTo(index: nextMessageIndex, alignment: 1);
-      }
-    });
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-      child: ScrollablePositionedList.builder(
-          physics: const AlwaysScrollableScrollPhysics(),
-          itemScrollController: itemScrollController,
-          itemCount: comments!.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Visibility(
-              visible: index < nextMessageIndex,
-              child: ChatMessage(
-                  streamer: streamer,
-                  comment: comments![index],
-                  badges: badges),
-            );
-          }),
+      child: LayoutBuilder(builder: (context, constraints) {
+        WidgetsBinding.instance!.addPostFrameCallback((_) => {
+              if (controller.hasClients)
+                {
+                  controller.jumpToIndexAndOffset(
+                      index: nextMessageIndex, offset: -constraints.maxHeight)
+                }
+            });
+        return IndexedListView.builder(
+            controller: controller,
+            minItemCount: 0,
+            maxItemCount: comments!.length - 1,
+            itemBuilder: (BuildContext context, int index) {
+              return Visibility(
+                visible: index < nextMessageIndex,
+                child: ChatMessage(
+                    streamer: streamer,
+                    comment: comments![index],
+                    badges: badges),
+              );
+            });
+      }),
     );
   }
 }
