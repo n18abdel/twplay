@@ -1,7 +1,5 @@
 import re
 import signal
-import subprocess
-import tempfile
 import threading
 from types import FrameType
 from typing import Callable, Optional, Union
@@ -35,15 +33,6 @@ def parse_vod_id(url: str) -> str:
             "https://twitch.tv/videos/<vod_id>",
         )
         exit(1)
-
-
-def download_chat(vod_id: str) -> bytes:
-    with tempfile.NamedTemporaryFile() as f:
-        subprocess.run(
-            ["TwitchDownloaderCLI", "-m", "ChatDownload", "--id", vod_id, "-o", f.name]
-        )
-        chat = f.readline()
-    return chat
 
 
 def send_chat_file(channel: BlockingChannel, chat: Union[str, bytes]) -> None:
