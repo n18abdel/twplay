@@ -12,7 +12,7 @@ def download_chat(vod_id: str) -> bytes:
     return chat
 
 
-def retrieve_playable_url(vod_id: Union[int, str]) -> str:
+def retrieve_playable_url(vod_id: Union[int, str], tmpdir: str) -> str:
     with tempfile.NamedTemporaryFile() as f:
         subprocess.run(
             [
@@ -20,6 +20,8 @@ def retrieve_playable_url(vod_id: Union[int, str]) -> str:
                 f"https://www.twitch.tv/videos/{vod_id}",
                 "-o",
                 f.name,
+                "--tmpdir",
+                tmpdir,
             ]
         )
         url = f.readline().decode("utf-8")

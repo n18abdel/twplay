@@ -18,7 +18,17 @@ class Player:
         return None if self._mpv.time_pos is None else str(self._mpv.time_pos)
 
     def play(self, url: str) -> None:
-        self._mpv.play(url)
+        self._mpv.command(
+            {
+                "name": "loadfile",
+                "url": url,
+                "options": {
+                    "hwdec": "auto",
+                    "stream-lavf-o-append": "protocol_whitelist=file,http,https,tcp,tls,crypto,hls,applehttp",
+                    "cache": "yes",
+                },
+            }
+        )
 
     def terminate(self) -> None:
         self._mpv.terminate()

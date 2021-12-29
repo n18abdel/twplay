@@ -1,4 +1,5 @@
 import argparse
+import tempfile
 from functools import partial
 
 import amqp
@@ -46,7 +47,8 @@ def main() -> None:
         )
     )
 
-    player.play(controller.retrieve_playable_url(vod_id))
+    tmpdir = tempfile.mkdtemp()
+    player.play(controller.retrieve_playable_url(vod_id, tmpdir))
 
 
 if __name__ == "__main__":
