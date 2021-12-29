@@ -1,0 +1,454 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass scrartcl
+\begin_preamble
+\usepackage{xcolor}
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style french
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Synchronisation d'un lecteur vidéo avec chat
+\end_layout
+
+\begin_layout Subtitle
+UE CALC
+\end_layout
+
+\begin_layout Author
+Nassim ABDELGHANI
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+Sur la plateforme de streaming Twitch, il y a la possibilité de faire une
+ diffusion vidéo en direct, avec laquelle des spectateurs peuvent interagir
+ par l'intermédiaire d'un chat.
+ La plateforme a également un service de vidéo à la demande, qui rend disponible
+ une diffusion terminée, ainsi que le chat associé.
+ Cependant, ce service est une solution web (ou mobile).
+ 
+\end_layout
+
+\begin_layout Standard
+On pourrait vouloir utiliser un autre lecteur vidéo que celui d'un navigateur
+ web, pour profiter de fonctionnalités que possède un lecteur vidéo dédié.
+ Mais les solutions pour cela se font le plus souvent au sacrifice du chat.
+ Il y a une possibilité qui est de générer un fichier vidéo à partir du
+ chat, et de le lire côte à cote avec la vidéo.
+ Mais cette dernière est longue, coûteuse en ressources et peu flexible.
+\end_layout
+
+\begin_layout Standard
+Le but de ce projet est d'introduire un afficheur à la volée du chat d'une
+ VOD Twitch, et de le synchroniser au lecteur vidéo.
+\end_layout
+
+\begin_layout Section
+Architecture logicielle
+\end_layout
+
+\begin_layout Standard
+Il a été décidé d'avoir une sorte d'architecture microservice avec :
+\end_layout
+
+\begin_layout Itemize
+un lecteur vidéo
+\end_layout
+
+\begin_layout Itemize
+un module de téléchargement du chat
+\end_layout
+
+\begin_layout Itemize
+un afficheur du chat
+\end_layout
+
+\begin_layout Itemize
+un contrôleur 
+\end_layout
+
+\begin_layout Standard
+Le contrôleur se charge de démarrer un lecteur vidéo et le module de téléchargem
+ent du chat.
+ Ce module se connecte à l'API de Twitch pour récupérer le chat et le transférer
+ au contrôleur.
+ Le lecteur récupère le flux vidéo de Twitch, et envoie des évènements liés
+ à la lecture au contrôleur.
+ Le contrôleur transfère le chat à l'afficheur, et les évènements du lecteur
+ afin de la maintenir synchronisé.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images rapport/images rapport.001.jpeg
+	lyxscale 10
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Détails d'implémentation
+\end_layout
+
+\begin_layout Subsubsection
+Lecteur
+\end_layout
+
+\begin_layout Standard
+J'utilise quotidiennement le lecteur 
+\begin_inset CommandInset href
+LatexCommand href
+name "MPV"
+target "https://mpv.io"
+literal "false"
+
+\end_inset
+
+ pour ses performances, et sa possibilité d'y utiliser des scripts et d'ainsi
+ étendre ses fonctionnalités.
+ Il intègre le module 
+\begin_inset CommandInset href
+LatexCommand href
+name "youtube-dl"
+target "https://youtube-dl.org"
+literal "false"
+
+\end_inset
+
+ ce qui permet la lecture du contenu vidéo d'
+\begin_inset CommandInset href
+LatexCommand href
+name "un nombre important de sites"
+target "https://ytdl-org.github.io/youtube-dl/supportedsites.html"
+literal "false"
+
+\end_inset
+
+.
+ Aussi ce lecteur fournit une interface JSON IPC permettant de l'intégrer
+ à d'autres applications.
+ C'est donc naturellement que j'ai construit le projet autour de ce lecteur,
+ d'autant plus que c'est un logiciel multiplateforme, facilitant donc la
+ portabilité du projet.
+\end_layout
+
+\begin_layout Subsubsection
+Module de téléchargement du chat
+\end_layout
+
+\begin_layout Standard
+J'avais expérimenté avec le logiciel en ligne de commandes 
+\begin_inset CommandInset href
+LatexCommand href
+name "TwitchDownloader"
+target "https://github.com/lay295/TwitchDownloader"
+literal "false"
+
+\end_inset
+
+.
+ Il permet de récupérer un fichier brut en JSON du chat, et d'en générer
+ une vidéo comme présenté en introduction.
+ J'ai donc réutilisé ce logiciel mais uniquement la partie de téléchargement,
+ pour pouvoir m'occuper de l'affichage à la volée.
+\end_layout
+
+\begin_layout Subsubsection
+Afficheur chat
+\end_layout
+
+\begin_layout Standard
+L'utilisation prévue de l'afficheur est sur la même machine que le lecteur
+ avec en l'occurence le système d'exploitation macOS.
+ Mais je ne voulais pas exclure une utilisation déportée sur un autre appareil,
+ éventuellement mobile.
+ J'ai donc choisi d'utiliser le framework Flutter avec le langage Dart.
+ Ce framework est également multiplateforme, et promet de générer à partir
+ d'un unique code source une application de bureau (Linux, macOS, Windows)
+ ou bien mobile (iOS, Android).
+ Il y a également une librairie 
+\begin_inset CommandInset href
+LatexCommand href
+name "dart_amqp"
+target "https://pub.dev/packages/dart_amqp"
+literal "false"
+
+\end_inset
+
+ implémentant en partie le protocole AMQP 0.9.1.
+\end_layout
+
+\begin_layout Subsubsection
+Contrôleur
+\end_layout
+
+\begin_layout Standard
+Cette partie a été développée en Python.
+ 
+\end_layout
+
+\begin_layout Itemize
+Une classe Player définit l'interface requise du lecteur vidéo (écoute d'évèneme
+nts lecture, pause, changement de vitesse).
+ Un quelconque lecteur peut donc être utilisé tant qu'il satisfait cette
+ interface.
+\end_layout
+
+\begin_layout Itemize
+Il existe une librairie 
+\begin_inset CommandInset href
+LatexCommand href
+name "python-mpv-jsonipc"
+target "https://pypi.org/project/python-mpv-jsonipc/"
+literal "false"
+
+\end_inset
+
+ qui s'occupe déjà de communiquer avec le lecteur MPV, donc c'est ce que
+ j'ai utilisé pour l'implémentation de la classe Player.
+\end_layout
+
+\begin_layout Itemize
+Avec la librairie subprocess, on peut interagir avec le module de téléchargement.
+\end_layout
+
+\begin_layout Itemize
+Enfin, avec la librairie 
+\begin_inset CommandInset href
+LatexCommand href
+name "pika"
+target "https://pypi.org/project/pika/"
+literal "false"
+
+\end_inset
+
+, un client AMQP 0.9.1, il est possible de communiquer avec l'afficheur.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images rapport/images rapport.002.jpeg
+	lyxscale 10
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Utilisation de RabbitMQ
+\end_layout
+
+\begin_layout Standard
+RabbitMQ a été mis en place pour la communication contrôleur-afficheur.
+ Pour l'instant, tout se déroule sur une unique machine, donc le contrôleur
+ ainsi que l'afficheur supposent qu'une instance de RabbitMQ tourne sur
+ localhost sur le port standard 5672.
+\end_layout
+
+\begin_layout Standard
+J'ai utilisé le mode topic pour sa flexibilité, avec les clés de routages
+ suivantes :
+\end_layout
+
+\begin_layout Itemize
+json : envoi du fichier brut JSON du chat
+\end_layout
+
+\begin_layout Itemize
+sync.play : envoi de la position du lecteur en cas d'un évènement lecture
+\end_layout
+
+\begin_layout Itemize
+sync.pause : envoi de la position du lecteur en cas d'un évènement pause
+\end_layout
+
+\begin_layout Itemize
+sync.seek : envoi de la position du lecteur en cas de changement par une
+ action utilisateur
+\end_layout
+
+\begin_layout Itemize
+sync.speed : envoi de la nouvelle vitesse du lecteur en cas de changement
+\end_layout
+
+\begin_layout Itemize
+sync.timer : envoi périodique de la position du lecteur pour régler d'éventuelles
+ pertes de synchronisation
+\end_layout
+
+\begin_layout Itemize
+exit : envoi d'un signal à la fermeture du lecteur
+\end_layout
+
+\begin_layout Standard
+Par simplicité, seul le contrôleur est producteur, et l'afficheur est uniquement
+ consommateur, on fait l'hypothèse que l'afficheur est actif lorsque le
+ contrôleur envoie les messages.
+ Côté afficheur une queue est dédiée à chacun de ces topics.
+ Il était pratique pendant le développement d'avoir une queue écoutant les
+ messages sync.* pour pouvoir débogguer.
+\end_layout
+
+\begin_layout Standard
+L'utilisation de RabbitMQ a ici facilité la communication entre deux services.
+ J'ai pu ainsi choisir les langages indépendamment, selon mes connaissances,
+ ou le besoin du service.
+ En l'occurence, j'ai choisi Python pour le contrôleur par facilité, et
+ Dart + Flutter plus adapté au développement d'une interface graphique multiplat
+eforme.
+\end_layout
+
+\begin_layout Standard
+On peut aussi noter l'extensibilité d'une solution autour de RabbitMQ.
+ L'ajout d'un fonctionnement RPC pour la récupération du fichier JSON du
+ chat, permettrait par exemple qu'un afficheur puisse se connecter en cours
+ de route.
+ Et on pourrait imaginer avoir un paramètre pour le chemin d'accès à l'instance
+ RabbitMQ.
+ De cette manière, le lecteur et les afficheurs pourraient tourner sur des
+ machines différentes.
+ Par exemple un ordinateur connecté à un téléviseur ferait tourner le lecteur,
+ et une tablette ferait tourner l'afficheur.
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+J'utilisais parfois la solution proposée en introduction dans le cas de
+ diffusions courtes, mais pour une diffusion plus longue et/ou avec un chat
+ actif, la génération d'une vidéo du chat pouvait prendre plusieurs heures,
+ et faire abandonner l'utilisation du logiciel.
+ En comparaison, la solution développée dans ce projet est seulement limitée
+ au démarrage par le téléchargement du chat, mais cela ne dure que quelques
+ minutes, ce qui est plus acceptable.
+ Il pouvait aussi arriver que le chat et la vidéo ne soient pas exactement
+ synchronisés.
+ Avec MPV via FFMPEG, il était possible de régler un décalage d'un fichier
+ par rapport à l'autre, mais ce n'était pas chose simple.
+ Changer le décalage obligeait aussi à quitter puis relancer la vidéo, ne
+ facilitant pas un réglage fin.
+ Le développement d'un afficheur dédié facilite ce genre d'opérations sans
+ le besoin de relancer la vidéo.
+\end_layout
+
+\begin_layout Standard
+Malgré les cours, qui mentionnaient précisément les avantages d'une solution
+ logicielle reposant sur RabbitMQ, cela était plutôt abstrait pour moi au
+ début et j'avais besoin de concrètement voir ceux-ci à l'oeuvre.
+ Par ailleurs, j'ai été un peu déstabilisé par la liberté donnée dans le
+ choix du sujet.
+ Mais finalement, cela m'a permis de toucher du doigt les avantages d'une
+ telle solution, sur un projet que je me vois étendre et utiliser.
+ 
+\end_layout
+
+\end_body
+\end_document
