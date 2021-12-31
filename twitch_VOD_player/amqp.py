@@ -1,16 +1,22 @@
-from typing import Tuple, Union
+from typing import List, Union
 
 import pika
 from pika.adapters.blocking_connection import BlockingChannel
 
 
-def init() -> Tuple[pika.BlockingConnection, BlockingChannel]:
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host="localhost", heartbeat=0)
-    )
+def init(n: int) -> List[pika.BlockingConnection]:
+    return [
+        pika.BlockingConnection(
+            pika.ConnectionParameters(host="localhost", heartbeat=0)
+        )
+        for i in range(n)
+    ]
+
+
+def new_channel(connection: pika.BlockingConnection) -> BlockingChannel:
     channel = connection.channel()
     channel.exchange_declare(exchange="topic_chat", exchange_type="topic")
-    return connection, channel
+    return channel
 
 
 def publish(

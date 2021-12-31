@@ -2,7 +2,7 @@ import re
 import signal
 import threading
 from types import FrameType
-from typing import Callable, Optional, Union
+from typing import Callable, List, Optional, Union
 
 from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
 
@@ -53,7 +53,7 @@ def setup_timer_loop(
 
 
 def exit_callback(
-    connection: BlockingConnection,
+    connections: List[BlockingConnection],
     channel: BlockingChannel,
     timer: threading.Timer,
     player: Player,
@@ -62,7 +62,8 @@ def exit_callback(
     timer.cancel()
     topics.chatExit(channel)
     print("Sent exit message to chat")
-    connection.close()
+    for connection in connections:
+        connection.close()
     print("Closed AMQP connections")
     player.terminate()
     print("Closed MPV")
