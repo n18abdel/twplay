@@ -26,6 +26,8 @@ class Player:
                     "hwdec": "auto",
                     "stream-lavf-o-append": "protocol_whitelist=file,http,https,tcp,tls,crypto,hls,applehttp",
                     "cache": "yes",
+                    "demuxer-max-bytes": "8GiB",
+                    "demuxer-max-back-bytes": "8GiB",
                 },
             }
         )
