@@ -18,6 +18,7 @@ def main() -> None:
     parser.add_argument("url", help="a Twitch VOD url")
     args = parser.parse_args()
 
+    controller.launch_rabbitmq()
     controller.launch_chat_renderer()
 
     vod_id = utils.parse_vod_id(args.url)
