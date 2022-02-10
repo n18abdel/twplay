@@ -17,7 +17,9 @@ class MyApp extends StatelessWidget {
       create: (context) => AppStatus(),
       child: MaterialApp(
         title: 'Twitch chat render',
-        theme: ThemeData.dark(),
+        themeMode: ThemeMode.system,
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
         initialRoute: "/loading",
         routes: {
           "/chat": (_) => const ChatPage(),
