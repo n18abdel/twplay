@@ -16,6 +16,7 @@ class AppStatus with ChangeNotifier {
   BTTVEmotes? bttvEmotes;
   TwitchCheerEmotes? cheerEmotes;
   bool initStatus = false;
+  int nextMessageIndex = 0;
 
   AppStatus() {
     fetchChat();
@@ -82,5 +83,13 @@ class AppStatus with ChangeNotifier {
           cheerEmotes!.initialized();
     }
     return initStatus;
+  }
+
+  void incNextMessageIndex() {
+    nextMessageIndex++;
+  }
+
+  void decNextMessageIndex() {
+    nextMessageIndex--;
   }
 }

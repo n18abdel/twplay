@@ -29,7 +29,8 @@ class _ChatState extends State<Chat> {
       Provider.of<AppStatus>(context, listen: false).bttvEmotes;
   TwitchCheerEmotes? get cheerEmotes =>
       Provider.of<AppStatus>(context, listen: false).cheerEmotes;
-  int nextMessageIndex = 0;
+  int get nextMessageIndex =>
+      Provider.of<AppStatus>(context, listen: false).nextMessageIndex;
   Duration updatePeriod = const Duration(milliseconds: 300);
   Timer? timer;
   Stopwatch stopwatch = Stopwatch();
@@ -107,7 +108,7 @@ class _ChatState extends State<Chat> {
       double lookupTime = chatTime + chatOffset;
       while (nextMessageIndex < comments!.length - 1 &&
           comments![nextMessageIndex].contentOffsetSeconds! < lookupTime) {
-        nextMessageIndex++;
+        context.read<AppStatus>().incNextMessageIndex();
       }
     }
   }
@@ -117,7 +118,7 @@ class _ChatState extends State<Chat> {
       double lookupTime = chatTime + chatOffset;
       while (nextMessageIndex > 0 &&
           comments![nextMessageIndex - 1].contentOffsetSeconds! > lookupTime) {
-        nextMessageIndex--;
+        context.read<AppStatus>().decNextMessageIndex();
       }
     }
   }
