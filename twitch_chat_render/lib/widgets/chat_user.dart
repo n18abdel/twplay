@@ -14,7 +14,12 @@ class ChatUser {
     Text username = Text("${comment?.commenter?.displayName}: ",
         style: TextStyle(
             color: comment?.message?.userColor == null
-                ? Theme.of(context).primaryColorLight
+                ? Color(comment!.commenter!.displayName!.hashCode).withAlpha(
+                    255 -
+                        Theme.of(context)
+                            .backgroundColor
+                            .computeLuminance()
+                            .round())
                 : HexColor(comment!.message!.userColor!),
             fontWeight: FontWeight.bold));
     return WidgetSpan(
