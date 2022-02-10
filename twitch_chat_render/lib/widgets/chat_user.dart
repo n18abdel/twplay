@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
@@ -11,16 +13,19 @@ class ChatUser {
   final Comment? comment;
 
   WidgetSpan from(BuildContext context) {
+    double backgroundLuminance =
+        Theme.of(context).backgroundColor.computeLuminance();
+    Color baseColor = comment?.message?.userColor == null
+        ? Color(comment!.commenter!.displayName!.hashCode)
+        : HexColor(comment!.message!.userColor!);
+    int offset = backgroundLuminance < 0.5
+        ? [255 - baseColor.red, 255 - baseColor.green, 255 - baseColor.blue]
+            .reduce(min)
+        : [-baseColor.red, -baseColor.green, -baseColor.blue].reduce(max);
     Text username = Text("${comment?.commenter?.displayName}: ",
         style: TextStyle(
-            color: comment?.message?.userColor == null
-                ? Color(comment!.commenter!.displayName!.hashCode).withAlpha(
-                    255 -
-                        Theme.of(context)
-                            .backgroundColor
-                            .computeLuminance()
-                            .round())
-                : HexColor(comment!.message!.userColor!),
+            color: Color.fromARGB(255, baseColor.red + offset,
+                baseColor.green + offset, baseColor.blue + offset),
             fontWeight: FontWeight.bold));
     return WidgetSpan(
         alignment: PlaceholderAlignment.middle,
