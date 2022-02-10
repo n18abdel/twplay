@@ -59,16 +59,24 @@ class ChatTextFragment {
         bool isUrl =
             uri != null && uri.hasAbsolutePath && uri.scheme.startsWith('http');
         bool isMention = token.startsWith("@");
-        spans.add(TextSpan(
-            recognizer: isUrl
-                ? (TapGestureRecognizer()
-                  ..onTap = () async => await launch(token))
-                : null,
-            text: token,
-            style: TextStyle(
-                color: isUrl ? Colors.blue : null,
-                decoration: isUrl ? TextDecoration.underline : null,
-                fontWeight: isMention ? FontWeight.bold : null)));
+        spans.add(isMention
+            ? WidgetSpan(
+                child: Utils.clickableUsername(
+                    child: Text(token,
+                        style: TextStyle(
+                            color: Theme.of(context).indicatorColor,
+                            fontWeight: FontWeight.bold)),
+                    context: context,
+                    displayName: token.replaceFirst("@", "")))
+            : TextSpan(
+                recognizer: isUrl
+                    ? (TapGestureRecognizer()
+                      ..onTap = () async => await launch(token))
+                    : null,
+                text: token,
+                style: TextStyle(
+                    color: isUrl ? Colors.blue : null,
+                    decoration: isUrl ? TextDecoration.underline : null)));
       }
     }
     return TextSpan(children: spans);

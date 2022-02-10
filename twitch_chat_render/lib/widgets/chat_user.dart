@@ -34,7 +34,10 @@ class ChatUser {
                         height: Utils.heightOfText(context: context),
                         child: ChatBadge(badge: badge, badges: badges));
                   }),
-            username
+            Utils.clickableUsername(
+                child: username,
+                context: context,
+                displayName: comment!.commenter!.displayName!)
           ],
         ));
   }
