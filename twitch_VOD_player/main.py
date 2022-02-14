@@ -15,13 +15,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Play a Twitch VOD with the chat using MPV and a chat renderer"
     )
-    parser.add_argument("url", help="a Twitch VOD url")
+    parser.add_argument("url_or_user", help="a Twitch VOD url or a Twitch username")
     args = parser.parse_args()
 
     controller.launch_rabbitmq()
     controller.launch_chat_renderer()
 
-    vod_id = utils.parse_vod_id(args.url)
+    vod_id = utils.parse_vod_id(args.url_or_user)
     chat = controller.download_chat(vod_id)
 
     connections = amqp.init(8)

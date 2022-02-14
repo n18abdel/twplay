@@ -7,6 +7,7 @@ from typing import Callable, List, Optional, Union
 from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
 
 import topics
+import controller
 from player import Player
 
 
@@ -18,10 +19,13 @@ def setup_exit_handler(callback: Callable[[], None]) -> None:
     signal.signal(signal.SIGINT, handler)
 
 
-def parse_vod_id(url: str) -> str:
-    match = re.search(r"twitch.tv/videos/(\d+)", url)
+def parse_vod_id(url_or_user: str) -> str:
+    match = re.search(r"twitch.tv/videos/(\d+)", url_or_user)
     if match:
         return match.group(1)
+    user_id = controller.retrieve_user_id(url_or_user)
+    if user_id:
+        return controller.retrieve_last_vod_id(user_id)
     else:
         print(
             "Couldn't parse VOD id\n",

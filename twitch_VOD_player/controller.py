@@ -1,7 +1,8 @@
+import json
 import subprocess
 import tempfile
 from time import sleep
-from typing import Union
+from typing import Optional, Union
 
 
 def download_chat(vod_id: str) -> bytes:
@@ -64,3 +65,22 @@ def launch_rabbitmq() -> None:
             ]
         )
         sleep(20)
+
+
+def retrieve_user_id(username: str) -> Optional[str]:
+    p = subprocess.run(
+        ["twitch", "api", "get", "users", "-q", f"login={username}"],
+        capture_output=True,
+    )
+    output = json.loads(p.stdout)["data"]
+    if len(output) > 0:
+        return str(output[0]["id"])
+    return None
+
+
+def retrieve_last_vod_id(user_id: str) -> str:
+    p = subprocess.run(
+        ["twitch", "api", "get", "videos", "-q", f"user_id={user_id}"],
+        capture_output=True,
+    )
+    return str(json.loads(p.stdout)["data"][0]["id"])
