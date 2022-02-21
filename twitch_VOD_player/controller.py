@@ -4,6 +4,8 @@ import tempfile
 from time import sleep
 from typing import Optional, Union
 
+import requests
+
 
 def download_chat(vod_id: str) -> bytes:
     with tempfile.NamedTemporaryFile() as f:
@@ -45,7 +47,12 @@ def launch_docker() -> None:
 
 
 def is_rabbitmq_running() -> bool:
-    return "rabbitmq" in subprocess.check_output(["docker", "ps"], encoding="utf-8")
+    try:
+        r = requests.get("http://localhost:15672")
+    except Exception:
+        return False
+    else:
+        return r.ok
 
 
 def launch_rabbitmq() -> None:
