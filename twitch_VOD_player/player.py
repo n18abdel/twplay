@@ -28,6 +28,7 @@ class Player:
                     "cache": "yes",
                     "demuxer-max-bytes": "500MiB",
                     "demuxer-max-back-bytes": "500MiB",
+                    "merge-files": "yes",
                 },
             }
         )
@@ -63,4 +64,5 @@ class Player:
     def on_end_of_file(self, func: Callable[["Player"], None]) -> None:
         @self._mpv.on_event("end-file")
         def callback(event_data: dict) -> None:
-            func(self)
+            if event_data["reason"] != "redirect":
+                func(self)
