@@ -26,7 +26,22 @@ class OffsetDialog extends StatelessWidget {
                       model.decOffset();
                     },
                     icon: const Icon(Icons.remove)),
-                Text('Offset: ${model.offset}s'),
+                const Text('Offset:'),
+                SizedBox(
+                  width: 50,
+                  child: TextField(
+                    onChanged: (text) {
+                      model.setOffset(double.parse(text));
+                    },
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      hintText: '${model.offset}',
+                    ),
+                  ),
+                ),
+                const Text('s'),
                 IconButton(
                     onPressed: () {
                       model.incOffset();

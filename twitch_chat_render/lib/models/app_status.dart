@@ -37,6 +37,11 @@ class AppStatus with ChangeNotifier {
     notifyListeners();
   }
 
+  void setOffset(double o) {
+    offset = o;
+    notifyListeners();
+  }
+
   void incOffset() {
     offset += offsetIncrement;
     notifyListeners();
