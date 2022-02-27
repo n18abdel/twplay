@@ -16,6 +16,7 @@ def main() -> None:
         description="Play a Twitch VOD with the chat using MPV and a chat renderer"
     )
     parser.add_argument("url_or_user", help="a Twitch VOD url or a Twitch username")
+    parser.add_argument("-f", "--local_file", help="a local file of the VOD")
     args = parser.parse_args()
 
     controller.launch_rabbitmq()
@@ -55,7 +56,11 @@ def main() -> None:
     )
 
     tmpdir = tempfile.mkdtemp()
-    player.play(controller.retrieve_playable_url(vod_id, tmpdir))
+    player.play(
+        args.local_file
+        if args.local_file
+        else controller.retrieve_playable_url(vod_id, tmpdir)
+    )
 
 
 if __name__ == "__main__":
