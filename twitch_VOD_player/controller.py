@@ -7,11 +7,24 @@ from typing import Optional, Union
 import requests
 
 
-def download_chat(vod_id: str) -> bytes:
+def download_chat(
+    vod_id: str, beginning: Optional[str], ending: Optional[str]
+) -> bytes:
     with tempfile.NamedTemporaryFile() as f:
-        subprocess.run(
-            ["TwitchDownloaderCLI", "-m", "ChatDownload", "--id", vod_id, "-o", f.name]
-        )
+        command = [
+            "TwitchDownloaderCLI",
+            "-m",
+            "ChatDownload",
+            "--id",
+            vod_id,
+            "-o",
+            f.name,
+        ]
+        if beginning:
+            command.extend(["-b", beginning])
+        if ending:
+            command.extend(["-e", ending])
+        subprocess.run(command)
         chat = f.readline()
     return chat
 

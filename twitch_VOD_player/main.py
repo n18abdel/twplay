@@ -17,13 +17,29 @@ def main() -> None:
     )
     parser.add_argument("url_or_user", help="a Twitch VOD url or a Twitch username")
     parser.add_argument("-f", "--local_file", help="a local file of the VOD")
+    parser.add_argument(
+        "-b",
+        "--beginning",
+        help="""
+        Time in seconds to crop beginning.
+        For example if I wanted a 10 second stream but only wanted the last 7 seconds of it I would use -b 3 to skip the first 3 seconds of it.
+        """,
+    )
+    parser.add_argument(
+        "-e",
+        "--ending",
+        help="""
+        Time in seconds to crop ending.
+        For example if I wanted a 10 second stream but only wanted the first 4 seconds of it I would use -e 4 remove the last 6 seconds of it.
+        """,
+    )
     args = parser.parse_args()
 
     controller.launch_rabbitmq()
     controller.launch_chat_renderer()
 
     vod_id = utils.parse_vod_id(args.url_or_user)
-    chat = controller.download_chat(vod_id)
+    chat = controller.download_chat(vod_id, args.beginning, args.ending)
 
     connections = amqp.init(8)
 
