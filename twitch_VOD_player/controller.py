@@ -7,25 +7,32 @@ from typing import Optional, Union
 import requests
 
 
-def download_chat(
-    vod_id: str, beginning: Optional[str], ending: Optional[str]
+def fetch_chat(
+    vod_id: str,
+    chat_file: Optional[str],
+    beginning: Optional[str],
+    ending: Optional[str],
 ) -> bytes:
-    with tempfile.NamedTemporaryFile() as f:
-        command = [
-            "TwitchDownloaderCLI",
-            "-m",
-            "ChatDownload",
-            "--id",
-            vod_id,
-            "-o",
-            f.name,
-        ]
-        if beginning:
-            command.extend(["-b", beginning])
-        if ending:
-            command.extend(["-e", ending])
-        subprocess.run(command)
-        chat = f.readline()
+    if chat_file:
+        with open(chat_file, "r") as f:
+            chat = f.readline()
+    else:
+        with tempfile.NamedTemporaryFile() as f:
+            command = [
+                "TwitchDownloaderCLI",
+                "-m",
+                "ChatDownload",
+                "--id",
+                vod_id,
+                "-o",
+                f.name,
+            ]
+            if beginning:
+                command.extend(["-b", beginning])
+            if ending:
+                command.extend(["-e", ending])
+            subprocess.run(command)
+            chat = f.readline()
     return chat
 
 

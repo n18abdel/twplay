@@ -15,8 +15,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Play a Twitch VOD with the chat using MPV and a chat renderer"
     )
-    parser.add_argument("url_or_user", help="a Twitch VOD url or a Twitch username")
+    parser.add_argument(
+        "url_or_user",
+        help="a Twitch VOD url or a Twitch username",
+        nargs="?",
+        default="papesan",
+    )
     parser.add_argument("-f", "--local_file", help="a local file of the VOD")
+    parser.add_argument("-c", "--chat_file", help="a local chat file of the VOD")
     parser.add_argument(
         "-b",
         "--beginning",
@@ -39,7 +45,7 @@ def main() -> None:
     controller.launch_chat_renderer()
 
     vod_id = utils.parse_vod_id(args.url_or_user)
-    chat = controller.download_chat(vod_id, args.beginning, args.ending)
+    chat = controller.fetch_chat(vod_id, args.chat_file, args.beginning, args.ending)
 
     connections = amqp.init(8)
 
