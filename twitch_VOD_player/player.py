@@ -18,18 +18,24 @@ class Player:
         return None if self._mpv.time_pos is None else str(self._mpv.time_pos)
 
     def play(self, url: str) -> None:
+        options = {
+            "hwdec": "auto",
+            "stream-lavf-o-append": "protocol_whitelist=file,http,https,tcp,tls,crypto,hls,applehttp",
+            "merge-files": "yes",
+        }
+        if "http" in url:
+            options.update(
+                {
+                    "cache": "yes",
+                    "demuxer-max-bytes": "100MiB",
+                    "demuxer-max-back-bytes": "100MiB",
+                }
+            )
         self._mpv.command(
             {
                 "name": "loadfile",
                 "url": url,
-                "options": {
-                    "hwdec": "auto",
-                    "stream-lavf-o-append": "protocol_whitelist=file,http,https,tcp,tls,crypto,hls,applehttp",
-                    "cache": "yes",
-                    "demuxer-max-bytes": "500MiB",
-                    "demuxer-max-back-bytes": "500MiB",
-                    "merge-files": "yes",
-                },
+                "options": options,
             }
         )
 

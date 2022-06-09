@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:indexed_list_view/indexed_list_view.dart';
+import 'package:flutter_list_view/flutter_list_view.dart';
 import 'package:provider/provider.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/amqp_interface.dart';
@@ -42,7 +42,7 @@ class _ChatState extends State<Chat> {
   bool get playing => Provider.of<AppStatus>(context, listen: false).playing;
   bool get initStatus =>
       Provider.of<AppStatus>(context, listen: false).initStatus;
-  IndexedScrollController controller = IndexedScrollController();
+  FlutterListViewController controller = FlutterListViewController();
 
   @override
   void initState() {
@@ -135,30 +135,24 @@ class _ChatState extends State<Chat> {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) => {
+          if (controller.hasClients)
+            {controller.sliverController.jumpToIndex(nextMessageIndex)}
+        });
     return ScrollConfiguration(
-      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-      child: LayoutBuilder(builder: (context, constraints) {
-        WidgetsBinding.instance!.addPostFrameCallback((_) => {
-              if (controller.hasClients)
-                {
-                  controller.jumpToIndexAndOffset(
-                      index: nextMessageIndex, offset: -constraints.maxHeight)
-                }
-            });
-        return IndexedListView.builder(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: FlutterListView(
+            cacheExtent: 3,
             controller: controller,
-            minItemCount: 0,
-            maxItemCount: comments!.length - 1,
-            itemBuilder: (BuildContext context, int index) {
-              return Visibility(
+            delegate: FlutterListViewDelegate(
+              (BuildContext context, int index) => Visibility(
                 visible: index < nextMessageIndex,
                 child: ChatMessage(
                     streamer: streamer,
                     comment: comments![index],
                     badges: badges),
-              );
-            });
-      }),
-    );
+              ),
+              childCount: comments!.length - 1,
+            )));
   }
 }

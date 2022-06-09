@@ -1,5 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:optimized_cached_image/optimized_cached_image.dart';
 import 'package:provider/provider.dart';
 import 'package:twitch_chat_render/models/app_status.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
@@ -17,9 +17,12 @@ class Utils {
         .height;
   }
 
-  static CachedNetworkImage cachedNetworkImage(String url) {
-    return CachedNetworkImage(
-      placeholder: (context, url) => const CircularProgressIndicator(),
+  static OptimizedCacheImage cachedNetworkImage(String url) {
+    return OptimizedCacheImage(
+      placeholder: (context, url) => const Placeholder(
+        fallbackHeight: 1,
+        fallbackWidth: 1,
+      ),
       imageUrl: url,
     );
   }
