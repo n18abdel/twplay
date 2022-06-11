@@ -54,6 +54,7 @@ def retrieve_playable_url(vod_id: Union[int, str], tmpdir: str) -> str:
 
 def launch_chat_renderer() -> None:
     subprocess.run(["open", "-a", "twitch_chat_render"])
+    sleep(1)
 
 
 def is_docker_running() -> bool:
