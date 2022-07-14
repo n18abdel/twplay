@@ -41,7 +41,7 @@ dependencies:
   provider: ^6.0.1
   flutter_spinkit: ^5.1.0
   flutter_list_view: ^1.1.18
-  extended_image: ^6.2.1
+  optimized_cached_image: ^3.0.1
 
 dev_dependencies:
   flutter_test:
