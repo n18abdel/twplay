@@ -1,5 +1,5 @@
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:optimized_cached_image/optimized_cached_image.dart';
 import 'package:provider/provider.dart';
 import 'package:twitch_chat_render/models/app_status.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
@@ -17,14 +17,8 @@ class Utils {
         .height;
   }
 
-  static OptimizedCacheImage cachedNetworkImage(String url) {
-    return OptimizedCacheImage(
-      placeholder: (context, url) => const Placeholder(
-        fallbackHeight: 1,
-        fallbackWidth: 1,
-      ),
-      imageUrl: url,
-    );
+  static ExtendedImage cachedNetworkImage(String url) {
+    return ExtendedImage.network(url);
   }
 
   static Tooltip tooltip(

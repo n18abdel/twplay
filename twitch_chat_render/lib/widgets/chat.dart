@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_list_view/flutter_list_view.dart';
 import 'package:provider/provider.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/amqp_interface.dart';
@@ -42,7 +42,7 @@ class _ChatState extends State<Chat> {
   bool get playing => Provider.of<AppStatus>(context, listen: false).playing;
   bool get initStatus =>
       Provider.of<AppStatus>(context, listen: false).initStatus;
-  FlutterListViewController controller = FlutterListViewController();
+  ScrollController controller = ScrollController();
 
   @override
   void initState() {
@@ -137,22 +137,17 @@ class _ChatState extends State<Chat> {
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) => {
           if (controller.hasClients)
-            {controller.sliverController.jumpToIndex(nextMessageIndex)}
+            {controller.jumpTo(controller.position.maxScrollExtent)}
         });
     return ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-        child: FlutterListView(
-            cacheExtent: 3,
-            controller: controller,
-            delegate: FlutterListViewDelegate(
-              (BuildContext context, int index) => Visibility(
-                visible: index < nextMessageIndex,
-                child: ChatMessage(
-                    streamer: streamer,
-                    comment: comments![index],
-                    badges: badges),
-              ),
-              childCount: comments!.length - 1,
-            )));
+        child: ListView.builder(
+          addAutomaticKeepAlives: false,
+          cacheExtent: 0,
+          itemCount: min(comments!.length, nextMessageIndex),
+          controller: controller,
+          itemBuilder: (BuildContext context, int index) => ChatMessage(
+              streamer: streamer, comment: comments![index], badges: badges),
+        ));
   }
 }
