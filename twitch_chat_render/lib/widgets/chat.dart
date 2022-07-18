@@ -42,7 +42,6 @@ class _ChatState extends State<Chat> {
   bool get playing => Provider.of<AppStatus>(context, listen: false).playing;
   bool get initStatus =>
       Provider.of<AppStatus>(context, listen: false).initStatus;
-  ScrollController controller = ScrollController();
 
   @override
   void initState() {
@@ -136,19 +135,16 @@ class _ChatState extends State<Chat> {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) => {
-          if (controller.hasClients)
-            {controller.jumpTo(controller.position.maxScrollExtent)}
-        });
     return ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
         child: ListView.builder(
-          addAutomaticKeepAlives: false,
+          reverse: true,
           cacheExtent: 0,
           itemCount: min(comments!.length, nextMessageIndex),
-          controller: controller,
           itemBuilder: (BuildContext context, int index) => ChatMessage(
-              streamer: streamer, comment: comments![index], badges: badges),
+              streamer: streamer,
+              comment: comments![nextMessageIndex - index],
+              badges: badges),
         ));
   }
 }
