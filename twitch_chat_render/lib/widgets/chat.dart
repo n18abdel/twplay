@@ -67,6 +67,7 @@ class _ChatState extends State<Chat> {
       if (comments != null) {
         int oldNextMessageIndex = nextMessageIndex;
         forwardMessageIndex();
+        backwardMessageIndex();
         if (nextMessageIndex != oldNextMessageIndex) {
           setState(() {});
         }
@@ -97,10 +98,10 @@ class _ChatState extends State<Chat> {
     if (wasPlaying) pause(playerPosition);
     forwardMessageIndex();
     backwardMessageIndex();
-    if (wasPlaying) play(playerPosition);
     if (nextMessageIndex != oldNextMessageIndex) {
       setState(() {});
     }
+    if (wasPlaying) play(playerPosition);
   }
 
   void forwardMessageIndex() {
