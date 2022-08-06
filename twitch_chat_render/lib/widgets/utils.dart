@@ -1,5 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:optimized_cached_image/optimized_cached_image.dart';
 import 'package:provider/provider.dart';
 import 'package:twitch_chat_render/models/app_status.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
@@ -17,11 +17,13 @@ class Utils {
         .height;
   }
 
-  static OptimizedCacheImage cachedNetworkImage(String url) {
-    return OptimizedCacheImage(
-      placeholder: (context, url) => const Placeholder(
-        fallbackHeight: 1,
-        fallbackWidth: 1,
+  static CachedNetworkImage cachedNetworkImage(
+      String url, BuildContext context) {
+    return CachedNetworkImage(
+      placeholder: (context, url) => SizedBox(
+        height: Utils.heightOfText(context: context),
+        width: Utils.heightOfText(context: context),
+        child: const Placeholder(),
       ),
       imageUrl: url,
     );
@@ -40,13 +42,15 @@ class Utils {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            cachedNetworkImage(url.replaceRange(
-                url.lastIndexOf("1"), url.lastIndexOf("1") + 1, "3")),
+            cachedNetworkImage(
+                url.replaceRange(
+                    url.lastIndexOf("1"), url.lastIndexOf("1") + 1, "3"),
+                context),
             Text(name)
           ],
         ),
       )),
-      child: cachedNetworkImage(url),
+      child: cachedNetworkImage(url, context),
     );
   }
 
