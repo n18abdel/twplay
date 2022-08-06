@@ -42,6 +42,9 @@ class _ChatState extends State<Chat> {
   bool get playing => Provider.of<AppStatus>(context, listen: false).playing;
   bool get initStatus =>
       Provider.of<AppStatus>(context, listen: false).initStatus;
+  bool shouldScroll = true;
+  Timer? scrollTimeout;
+  ScrollController controller = ScrollController();
 
   @override
   void initState() {
@@ -104,7 +107,7 @@ class _ChatState extends State<Chat> {
   }
 
   void forwardMessageIndex() {
-    if (comments != null) {
+    if (comments != null && shouldScroll) {
       double lookupTime = chatTime + chatOffset;
       while (nextMessageIndex < comments!.length - 1 &&
           comments![nextMessageIndex].contentOffsetSeconds! < lookupTime) {
@@ -114,7 +117,7 @@ class _ChatState extends State<Chat> {
   }
 
   void backwardMessageIndex() {
-    if (comments != null) {
+    if (comments != null && shouldScroll) {
       double lookupTime = chatTime + chatOffset;
       while (nextMessageIndex > 0 &&
           comments![nextMessageIndex - 1].contentOffsetSeconds! > lookupTime) {
@@ -133,18 +136,63 @@ class _ChatState extends State<Chat> {
     });
   }
 
+  void resumeScrolling() {
+    controller.jumpTo(0);
+    setState(() => shouldScroll = true);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-        child: ListView.builder(
-          reverse: true,
-          cacheExtent: 0,
-          itemCount: min(comments!.length, nextMessageIndex),
-          itemBuilder: (BuildContext context, int index) => ChatMessage(
-              streamer: streamer,
-              comment: comments![nextMessageIndex - index],
-              badges: badges),
-        ));
+    return Stack(
+      children: <Widget>[
+        if (!shouldScroll)
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            alignment: Alignment.bottomCenter,
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.arrow_downward),
+              style: ButtonStyle(
+                  overlayColor:
+                      MaterialStateProperty.all<Color>(Colors.redAccent),
+                  foregroundColor:
+                      MaterialStateProperty.all<Color>(Colors.white),
+                  elevation: MaterialStateProperty.all<double>(100),
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                      Colors.red.withOpacity(1))),
+              label: const Text('Resume scrolling'),
+              onPressed: null,
+            ),
+          ),
+        InkWell(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          hoverColor: Colors.transparent,
+          focusColor: Colors.transparent,
+          onTap: resumeScrolling,
+          onHover: (value) {
+            if (scrollTimeout != null) scrollTimeout!.cancel();
+            if (value) {
+              setState(() => shouldScroll = false);
+            } else {
+              scrollTimeout =
+                  Timer(const Duration(seconds: 10), resumeScrolling);
+            }
+          },
+          child: ScrollConfiguration(
+              behavior:
+                  ScrollConfiguration.of(context).copyWith(scrollbars: false),
+              child: ListView.builder(
+                controller: controller,
+                reverse: true,
+                cacheExtent: 0,
+                itemCount: min(comments!.length, nextMessageIndex),
+                itemBuilder: (BuildContext context, int index) => ChatMessage(
+                    streamer: streamer,
+                    comment: comments![nextMessageIndex - index],
+                    badges: badges),
+              )),
+        ),
+      ],
+    );
   }
 }
