@@ -96,6 +96,7 @@ class Player:
             friendly_names=[CAST_NAME]
         )[0][0]
         cast.wait()
+        cast.media_controller.stop()
         listener = MyMediaStatusListener(cast.name)
         cast.media_controller.register_status_listener(listener)
         self._cast = cast

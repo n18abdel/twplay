@@ -10,7 +10,7 @@ import requests
 from pika.adapters.blocking_connection import BlockingChannel
 
 import topics
-from video_server import APP
+import video_server
 
 
 def fetch_chat(
@@ -129,7 +129,7 @@ def retrieve_local_ip() -> str:
     return f.read().strip()
 
 
-def launch_file_server(cast: bool) -> None:
-    if cast:
-        t = threading.Thread(target=APP.run, kwargs={"host": retrieve_local_ip()})
-        t.start()
+def launch_file_server(url: str) -> None:
+    APP = video_server.create_app(url)
+    t = threading.Thread(target=APP.run, kwargs={"host": retrieve_local_ip()})
+    t.start()

@@ -67,7 +67,6 @@ def main() -> None:
     timer = utils.setup_timer_loop(
         player, amqp.new_channel(connections[1]), period=UPDATE_PERIOD
     )
-    controller.launch_file_server(args.cast)
 
     player.on_seek(partial(topics.seek, amqp.new_channel(connections[2])))
     player.on_play(partial(topics.play, amqp.new_channel(connections[3])))

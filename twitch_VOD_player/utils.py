@@ -52,13 +52,17 @@ def setup_timer_loop(
 
 
 def get_media(local_file: Optional[str], cast: bool, vod_id: str, tmpdir: str):
-    return (
-        local_file
-        if local_file and not cast
-        else f"http://{controller.retrieve_local_ip()}:5000/{local_file}"
-        if local_file and cast
-        else controller.retrieve_playable_url(vod_id, tmpdir)
-    )
+    resolved = local_file or controller.retrieve_playable_url(vod_id, tmpdir)
+    if cast:
+        controller.launch_file_server(resolved)
+        local_ip = controller.retrieve_local_ip()
+        return (
+            f"http://{local_ip}:5000/{local_file}"
+            if local_file
+            else f"http://{local_ip}:5000/playlist.m3u8"
+        )
+    else:
+        return resolved
 
 
 def exit_callback(
