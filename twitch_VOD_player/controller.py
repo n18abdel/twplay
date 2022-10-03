@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import subprocess
 import tempfile
 import threading
@@ -38,6 +39,8 @@ def fetch_chat(
             if ending:
                 command.extend(["-e", ending])
             subprocess.run(command)
+            shutil.copyfileobj(f, open(f"{vod_id}.json", "wb"))
+            f.seek(0)
             chat = f.readline()
     return chat
 
