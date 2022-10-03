@@ -10,6 +10,7 @@ import 'package:twitch_chat_render/services/bttv_emotes.dart';
 import 'package:twitch_chat_render/services/twitch_badges.dart';
 import 'package:twitch_chat_render/services/twitch_cheer_emotes.dart';
 import 'package:twitch_chat_render/widgets/chat_message.dart';
+import 'package:wakelock/wakelock.dart';
 
 class Chat extends StatefulWidget {
   const Chat({Key? key}) : super(key: key);
@@ -143,6 +144,7 @@ class _ChatState extends State<Chat> {
 
   @override
   Widget build(BuildContext context) {
+    Wakelock.enable();
     return Stack(
       children: <Widget>[
         if (!shouldScroll)
