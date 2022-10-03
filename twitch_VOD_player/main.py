@@ -3,10 +3,11 @@ import tempfile
 from functools import partial
 
 import amqp
+import chromecast_player
 import controller
+import mpv_player
 import topics
 import utils
-from player import Player
 
 UPDATE_PERIOD = 60
 
@@ -28,7 +29,9 @@ def main() -> None:
         "--beginning",
         help="""
         Time in seconds to crop beginning.
-        For example if I wanted a 10 second stream but only wanted the last 7 seconds of it I would use -b 3 to skip the first 3 seconds of it.
+        For example,
+        if I wanted a 10 second stream but only wanted the last 7 seconds of it,
+        I would use -b 3 to skip the first 3 seconds of it.
         """,
     )
     parser.add_argument(
@@ -36,8 +39,16 @@ def main() -> None:
         "--ending",
         help="""
         Time in seconds to crop ending.
-        For example if I wanted a 10 second stream but only wanted the first 4 seconds of it I would use -e 4 remove the last 6 seconds of it.
+        For example,
+        if I wanted a 10 second stream but only wanted the first 4 seconds of it,
+        I would use -e 4 remove the last 6 seconds of it.
         """,
+    )
+    parser.add_argument(
+        "-ca",
+        "--cast",
+        action="store_true",
+        help="cast to shield tv",
     )
     args = parser.parse_args()
 
@@ -49,13 +60,14 @@ def main() -> None:
 
     connections = amqp.init(8)
 
-    utils.send_chat_file(amqp.new_channel(connections[0]), chat)
+    controller.send_chat_file(amqp.new_channel(connections[0]), chat)
 
-    player = Player()
+    player = chromecast_player.Player() if args.cast else mpv_player.Player()
 
     timer = utils.setup_timer_loop(
         player, amqp.new_channel(connections[1]), period=UPDATE_PERIOD
     )
+    controller.launch_file_server(args.cast)
 
     player.on_seek(partial(topics.seek, amqp.new_channel(connections[2])))
     player.on_play(partial(topics.play, amqp.new_channel(connections[3])))
@@ -78,11 +90,8 @@ def main() -> None:
     )
 
     tmpdir = tempfile.mkdtemp()
-    player.play(
-        args.local_file
-        if args.local_file
-        else controller.retrieve_playable_url(vod_id, tmpdir)
-    )
+    media = utils.get_media(args.local_file, args.cast, vod_id, tmpdir)
+    player.play(media)
 
 
 if __name__ == "__main__":

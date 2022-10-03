@@ -2,19 +2,18 @@ import re
 import signal
 import threading
 from types import FrameType
-from typing import Callable, List, Optional, Union
+from typing import Callable, List, Optional
 
 from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
 
-import topics
 import controller
-from player import Player
+import topics
+from mpv_player import Player
 
 
 def setup_exit_handler(callback: Callable[[], None]) -> None:
     def handler(signum: int, frame: Optional[FrameType]) -> None:
         callback()
-        exit(0)
 
     signal.signal(signal.SIGINT, handler)
 
@@ -39,10 +38,6 @@ def parse_vod_id(url_or_user: str) -> str:
         exit(1)
 
 
-def send_chat_file(channel: BlockingChannel, chat: Union[str, bytes]) -> None:
-    topics.json(channel, chat)
-
-
 def setup_timer_loop(
     player: Player, channel: BlockingChannel, period: int
 ) -> threading.Timer:
@@ -54,6 +49,16 @@ def setup_timer_loop(
     t = threading.Timer(period, timer_callback)
     t.start()
     return t
+
+
+def get_media(local_file: Optional[str], cast: bool, vod_id: str, tmpdir: str):
+    return (
+        local_file
+        if local_file and not cast
+        else f"http://{controller.retrieve_local_ip()}:5000/{local_file}"
+        if local_file and cast
+        else controller.retrieve_playable_url(vod_id, tmpdir)
+    )
 
 
 def exit_callback(
@@ -70,4 +75,4 @@ def exit_callback(
         connection.close()
     print("Closed AMQP connections")
     player.terminate()
-    print("Closed MPV")
+    print("Closed player")

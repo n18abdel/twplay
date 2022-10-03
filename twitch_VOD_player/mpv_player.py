@@ -1,3 +1,4 @@
+import threading
 from typing import Callable, Optional
 
 from python_mpv_jsonipc import MPV
@@ -20,7 +21,9 @@ class Player:
     def play(self, url: str) -> None:
         options = {
             "hwdec": "auto",
-            "stream-lavf-o-append": "protocol_whitelist=file,http,https,tcp,tls,crypto,hls,applehttp",
+            "stream-lavf-o-append": (
+                "protocol_whitelist=" "file,http,https,tcp,tls,crypto,hls,applehttp"
+            ),
             "merge-files": "yes",
         }
         if "http" in url:
@@ -71,4 +74,5 @@ class Player:
         @self._mpv.on_event("end-file")
         def callback(event_data: dict) -> None:
             if event_data["reason"] != "redirect":
-                func(self)
+                t = threading.Thread(target=func, args=(self,))
+                t.start()

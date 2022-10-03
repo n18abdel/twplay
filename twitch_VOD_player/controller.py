@@ -1,10 +1,16 @@
 import json
+import os
 import subprocess
 import tempfile
+import threading
 from time import sleep
 from typing import Optional, Union
 
 import requests
+from pika.adapters.blocking_connection import BlockingChannel
+
+import topics
+from video_server import APP
 
 
 def fetch_chat(
@@ -34,6 +40,10 @@ def fetch_chat(
             subprocess.run(command)
             chat = f.readline()
     return chat
+
+
+def send_chat_file(channel: BlockingChannel, chat: Union[str, bytes]) -> None:
+    topics.json(channel, chat)
 
 
 def retrieve_playable_url(vod_id: Union[int, str], tmpdir: str) -> str:
@@ -112,3 +122,14 @@ def retrieve_last_vod_id(user_id: str) -> str:
         capture_output=True,
     )
     return str(json.loads(p.stdout)["data"][0]["id"])
+
+
+def retrieve_local_ip() -> str:
+    f = os.popen("ifconfig en0 | grep 'inet ' | cut -d' ' -f2")
+    return f.read().strip()
+
+
+def launch_file_server(cast: bool) -> None:
+    if cast:
+        t = threading.Thread(target=APP.run, kwargs={"host": retrieve_local_ip()})
+        t.start()
