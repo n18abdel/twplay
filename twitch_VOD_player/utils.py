@@ -1,10 +1,12 @@
 import re
 import signal
 import threading
+from functools import partial
 from types import FrameType
 from typing import Callable, List, Optional
 
 from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
+from pynput import keyboard
 
 import controller
 import topics
@@ -63,6 +65,30 @@ def get_media(local_file: Optional[str], cast: bool, vod_id: str, tmpdir: str):
         )
     else:
         return resolved
+
+
+def on_press(player: Player, key: keyboard.Key):
+    if key == keyboard.Key.up:
+        current_speed = player.get_speed()
+        if current_speed < 1:
+            player.set_speed(1)
+        elif current_speed < 1.5:
+            player.set_speed(1.5)
+        elif current_speed < 2:
+            player.set_speed(2)
+    if key == keyboard.Key.down:
+        current_speed = player.get_speed()
+        if current_speed > 1.5:
+            player.set_speed(1.5)
+        elif current_speed > 1:
+            player.set_speed(1)
+        elif current_speed > 0.5:
+            player.set_speed(0.5)
+
+
+def setup_speed_handler(player: Player):
+    listener = keyboard.Listener(on_press=partial(on_press, player))
+    listener.start()
 
 
 def exit_callback(

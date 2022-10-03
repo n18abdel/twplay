@@ -77,7 +77,7 @@ def main() -> None:
             utils.exit_callback, connections, amqp.new_channel(connections[6]), timer
         )
     )
-
+    utils.setup_speed_handler(player)
     utils.setup_exit_handler(
         partial(
             utils.exit_callback,

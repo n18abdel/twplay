@@ -45,6 +45,12 @@ class Player:
     def terminate(self) -> None:
         self._mpv.terminate()
 
+    def get_speed(self) -> float:
+        return self._mpv.speed
+
+    def set_speed(self, speed: float) -> None:
+        self._mpv.speed = speed
+
     def on_play(self, func: Callable[[Optional[str]], None]) -> None:
         @self._mpv.property_observer("pause")
         def callback(property_name: str, pause: bool) -> None:

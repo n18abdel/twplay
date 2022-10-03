@@ -129,6 +129,12 @@ class Player:
     def terminate(self) -> None:
         self._cast.quit_app()
 
+    def get_speed(self) -> float:
+        return self._mc.status.playback_rate
+
+    def set_speed(self, speed: float) -> None:
+        self._mc.set_playback_rate(speed)
+
     def on_play(self, func: Callable[[Optional[str]], None]) -> None:
         self._listener.on_play(func)
 
