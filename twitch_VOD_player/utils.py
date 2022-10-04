@@ -40,15 +40,20 @@ def parse_vod_id(url_or_user: str) -> str:
         exit(1)
 
 
+class RepeatTimer(threading.Timer):
+    def run(self):
+        while not self.finished.wait(self.interval):
+            self.function(*self.args, **self.kwargs)
+
+
 def setup_timer_loop(
     player: Player, channel: BlockingChannel, period: int
-) -> threading.Timer:
+) -> RepeatTimer:
     def timer_callback() -> None:
         if player.current_pos():
             topics.timer(channel, str(player.current_pos()))
-        threading.Timer(period, timer_callback).start()
 
-    t = threading.Timer(period, timer_callback)
+    t = RepeatTimer(period, timer_callback)
     t.start()
     return t
 
@@ -94,7 +99,7 @@ def setup_speed_handler(player: Player):
 def exit_callback(
     connections: List[BlockingConnection],
     channel: BlockingChannel,
-    timer: threading.Timer,
+    timer: RepeatTimer,
     player: Player,
 ) -> None:
     print("Exiting")
