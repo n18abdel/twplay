@@ -23,7 +23,8 @@ def create_app(url):
 
     @APP.route("/<part>.ts")
     def chunk(part):
-        return reverse_proxy(url.replace("index-dvr.m3u8", f"{part}.ts"))
+        base = "/".join(url.split("/")[:-1])
+        return reverse_proxy(f"{base}/{part}.ts")
 
     def reverse_proxy(url):
         resp = get(url)
