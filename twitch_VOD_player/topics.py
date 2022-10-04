@@ -25,8 +25,8 @@ def timer(channel: BlockingChannel, pos: str) -> None:
     publish(channel, routing_key="sync.timer", body=pos)
 
 
-def speed(channel: BlockingChannel, speed: float) -> None:
-    publish(channel, routing_key="sync.speed", body=str(speed))
+def speed(channel: BlockingChannel, speed: str) -> None:
+    publish(channel, routing_key="sync.speed", body=speed)
 
 
 def chatExit(channel: BlockingChannel) -> None:

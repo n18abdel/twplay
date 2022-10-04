@@ -3,8 +3,10 @@ from typing import Callable, Optional
 
 from python_mpv_jsonipc import MPV
 
+from player import Player
 
-class Player:
+
+class MpvPlayer(Player):
     def __init__(self) -> None:
         self._mpv = MPV()  # Uses MPV that is in the PATH.
 
@@ -12,9 +14,11 @@ class Player:
         def on_loading(event_data: dict) -> None:
             self._mpv.pause = "yes"
 
+    @property
     def is_running(self) -> bool:
         return self._mpv.mpv_process.process.poll() is None
 
+    @property
     def current_pos(self) -> Optional[str]:
         return None if self._mpv.time_pos is None else str(self._mpv.time_pos)
 
@@ -45,36 +49,50 @@ class Player:
     def terminate(self) -> None:
         self._mpv.terminate()
 
-    def get_speed(self) -> float:
+    @property
+    def speed(self) -> float:
         return self._mpv.speed
 
-    def set_speed(self, speed: float) -> None:
+    @speed.setter
+    def speed(self, speed: float) -> None:
         self._mpv.speed = speed
+
+    def backward(self) -> None:
+        self._mpv.command("seek", -5)
+
+    def forward(self) -> None:
+        self._mpv.command("seek", 5)
+
+    def toggle_play(self) -> None:
+        self._mpv.command("cycle", "pause")
+
+    def seek(self, position: str) -> None:
+        self._mpv.command("seek", position, "absolute")
 
     def on_play(self, func: Callable[[Optional[str]], None]) -> None:
         @self._mpv.property_observer("pause")
         def callback(property_name: str, pause: bool) -> None:
-            if self.current_pos():
+            if self.current_pos:
                 if not pause:
-                    func(self.current_pos())
+                    func(self.current_pos)
 
     def on_pause(self, func: Callable[[Optional[str]], None]) -> None:
         @self._mpv.property_observer("pause")
         def callback(property_name: str, pause: bool) -> None:
-            if self.current_pos():
+            if self.current_pos:
                 if pause:
-                    func(self.current_pos())
+                    func(self.current_pos)
 
     def on_seek(self, func: Callable[[Optional[str]], None]) -> None:
         @self._mpv.on_event("seek")
         def callback(event_data: dict) -> None:
-            if self.current_pos():
-                func(self.current_pos())
+            if self.current_pos:
+                func(self.current_pos)
 
-    def on_speed_change(self, func: Callable[[float], None]) -> None:
+    def on_speed_change(self, func: Callable[[str], None]) -> None:
         @self._mpv.property_observer("speed")
         def callback(property_name: str, speed: float) -> None:
-            func(speed)
+            func(str(speed))
 
     def on_end_of_file(self, func: Callable[["Player"], None]) -> None:
         @self._mpv.on_event("end-file")

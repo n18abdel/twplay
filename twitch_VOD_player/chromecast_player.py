@@ -1,11 +1,14 @@
 import threading
 import time
 from copy import copy
+from functools import reduce
 from typing import Callable, Optional
 
 import pychromecast
 from pychromecast import quick_play
 from pychromecast.controllers.media import MediaStatus, MediaStatusListener
+
+from player import Player
 
 # Change to the friendly name of your Chromecast
 CAST_NAME = "SHIELD"
@@ -72,15 +75,15 @@ class MyMediaStatusListener(MediaStatusListener):
 
         self._callbacks["seek"] = callback
 
-    def on_speed_change(self, func: Callable[[float], None]) -> None:
+    def on_speed_change(self, func: Callable[[str], None]) -> None:
         def callback(old_status: MediaStatus, new_status: MediaStatus) -> None:
             if old_status and new_status.playback_rate != old_status.playback_rate:
-                func(new_status.playback_rate)
+                func(str(new_status.playback_rate))
 
         self._callbacks["speed_change"] = callback
 
     def on_end_of_file(
-        self, player: "Player", func: Callable[["Player"], None]
+        self, player: "ChromecastPlayer", func: Callable[["ChromecastPlayer"], None]
     ) -> None:
         def callback(old_status: MediaStatus, new_status: MediaStatus) -> None:
             if old_status and new_status.player_is_idle and new_status.idle_reason:
@@ -90,7 +93,7 @@ class MyMediaStatusListener(MediaStatusListener):
         self._callbacks["end_of_file"] = callback
 
 
-class Player:
+class ChromecastPlayer(Player):
     def __init__(self) -> None:
         cast: pychromecast.Chromecast = pychromecast.get_listed_chromecasts(
             friendly_names=[CAST_NAME]
@@ -103,9 +106,11 @@ class Player:
         self._mc = cast.media_controller
         self._listener = listener
 
+    @property
     def is_running(self) -> bool:
         return self._cast is not None
 
+    @property
     def current_pos(self) -> Optional[str]:
         return (
             None
@@ -130,11 +135,29 @@ class Player:
         self._mc.tear_down()
         self._cast.quit_app()
 
-    def get_speed(self) -> float:
+    @property
+    def speed(self) -> float:
         return self._mc.status.playback_rate
 
-    def set_speed(self, speed: float) -> None:
+    @speed.setter
+    def speed(self, speed: float) -> None:
         self._mc.set_playback_rate(speed)
+
+    def backward(self) -> None:
+        self._mc.seek(self._mc.status.adjusted_current_time - 5)
+
+    def forward(self) -> None:
+        self._mc.seek(self._mc.status.adjusted_current_time + 5)
+
+    def toggle_play(self) -> None:
+        if self._mc.status.player_is_playing:
+            self._mc.pause()
+        elif self._mc.status.player_is_paused:
+            self._mc.play()
+
+    def seek(self, position: str) -> None:
+        seconds = reduce(lambda x, y: 60 * x + y, map(float, position.split(":")))
+        self._mc.seek(seconds)
 
     def on_play(self, func: Callable[[Optional[str]], None]) -> None:
         self._listener.on_play(func)
@@ -145,7 +168,7 @@ class Player:
     def on_seek(self, func: Callable[[Optional[str]], None]) -> None:
         self._listener.on_seek(func)
 
-    def on_speed_change(self, func: Callable[[float], None]) -> None:
+    def on_speed_change(self, func: Callable[[str], None]) -> None:
         self._listener.on_speed_change(func)
 
     def on_end_of_file(self, func: Callable[["Player"], None]) -> None:

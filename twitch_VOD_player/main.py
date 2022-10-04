@@ -3,11 +3,11 @@ import tempfile
 from functools import partial
 
 import amqp
-import chromecast_player
 import controller
-import mpv_player
 import topics
 import utils
+from chromecast_player import ChromecastPlayer
+from mpv_player import MpvPlayer
 
 UPDATE_PERIOD = 60
 
@@ -62,7 +62,7 @@ def main() -> None:
 
     controller.send_chat_file(amqp.new_channel(connections[0]), chat)
 
-    player = chromecast_player.Player() if args.cast else mpv_player.Player()
+    player = ChromecastPlayer() if args.cast else MpvPlayer()
 
     timer = utils.setup_timer_loop(
         player, amqp.new_channel(connections[1]), period=UPDATE_PERIOD
@@ -77,7 +77,7 @@ def main() -> None:
             utils.exit_callback, connections, amqp.new_channel(connections[6]), timer
         )
     )
-    utils.setup_speed_handler(player)
+    utils.setup_keyboard_controls_handler(player)
     utils.setup_exit_handler(
         partial(
             utils.exit_callback,
