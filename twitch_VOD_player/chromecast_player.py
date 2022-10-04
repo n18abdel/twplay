@@ -127,6 +127,7 @@ class Player:
         self._mc.pause()
 
     def terminate(self) -> None:
+        self._mc.tear_down()
         self._cast.quit_app()
 
     def get_speed(self) -> float:

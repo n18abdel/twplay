@@ -134,5 +134,7 @@ def retrieve_local_ip() -> str:
 
 def launch_file_server(url: str) -> None:
     APP = video_server.create_app(url)
-    t = threading.Thread(target=APP.run, kwargs={"host": retrieve_local_ip()})
+    t = threading.Thread(
+        target=APP.run, kwargs={"host": retrieve_local_ip()}, daemon=True
+    )
     t.start()
