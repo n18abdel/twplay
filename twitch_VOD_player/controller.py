@@ -121,7 +121,16 @@ def retrieve_user_id(username: str) -> Optional[str]:
 
 def retrieve_last_vod_id(user_id: str) -> str:
     p = subprocess.run(
-        ["twitch", "api", "get", "videos", "-q", f"user_id={user_id}"],
+        [
+            "twitch",
+            "api",
+            "get",
+            "videos",
+            "-q",
+            f"user_id={user_id}",
+            "-q",
+            "type=archive",
+        ],
         capture_output=True,
     )
     return str(json.loads(p.stdout)["data"][0]["id"])
