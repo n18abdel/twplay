@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -110,7 +109,7 @@ class _ChatState extends State<Chat> {
   void forwardMessageIndex() {
     if (comments != null && shouldScroll) {
       double lookupTime = chatTime + chatOffset;
-      while (nextMessageIndex < comments!.length - 1 &&
+      while (nextMessageIndex < comments!.length &&
           comments![nextMessageIndex].contentOffsetSeconds! < lookupTime) {
         context.read<AppStatus>().incNextMessageIndex();
       }
@@ -187,10 +186,10 @@ class _ChatState extends State<Chat> {
                 controller: controller,
                 reverse: true,
                 cacheExtent: 0,
-                itemCount: min(comments!.length, nextMessageIndex),
+                itemCount: nextMessageIndex,
                 itemBuilder: (BuildContext context, int index) => ChatMessage(
                     streamer: streamer,
-                    comment: comments![nextMessageIndex - index],
+                    comment: comments![nextMessageIndex - 1 - index],
                     badges: badges),
               )),
         ),
