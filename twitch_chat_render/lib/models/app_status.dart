@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/amqp_interface.dart';
@@ -17,6 +19,9 @@ class AppStatus with ChangeNotifier {
   TwitchCheerEmotes? cheerEmotes;
   bool initStatus = false;
   int nextMessageIndex = 0;
+  bool shouldScroll = true;
+  ScrollController controller = ScrollController();
+  Timer? scrollTimeout;
 
   AppStatus() {
     fetchChat();
@@ -96,5 +101,24 @@ class AppStatus with ChangeNotifier {
 
   void decNextMessageIndex() {
     nextMessageIndex--;
+  }
+
+  void resumeScrolling() {
+    shouldScroll = true;
+    controller.jumpTo(0);
+    notifyListeners();
+  }
+
+  void stopScolling() {
+    shouldScroll = false;
+    hoverChat();
+    notifyListeners();
+  }
+
+  void hoverChat() {
+    if (scrollTimeout != null) scrollTimeout!.cancel();
+    if (!shouldScroll) {
+      scrollTimeout = Timer(const Duration(seconds: 3), resumeScrolling);
+    }
   }
 }

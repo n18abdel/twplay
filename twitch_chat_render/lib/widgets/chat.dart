@@ -42,21 +42,39 @@ class _ChatState extends State<Chat> {
   bool get playing => Provider.of<AppStatus>(context, listen: false).playing;
   bool get initStatus =>
       Provider.of<AppStatus>(context, listen: false).initStatus;
-  bool shouldScroll = true;
-  Timer? scrollTimeout;
-  ScrollController controller = ScrollController();
+  bool get shouldScroll =>
+      Provider.of<AppStatus>(context, listen: false).shouldScroll;
+  ScrollController get controller =>
+      Provider.of<AppStatus>(context, listen: false).controller;
 
   @override
   void initState() {
     super.initState();
     setupSync();
-    context.read<AppStatus>().addListener(() {
-      var newOffset = context.read<AppStatus>().offset;
-      if (newOffset != chatOffset) {
-        chatOffset = newOffset;
-        seek(chatTime);
+    controller.addListener(scrollListener);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    disposeSync();
+    controller.removeListener(scrollListener);
+  }
+
+  void scrollListener() {
+    controller.position.isScrollingNotifier.addListener(() {
+      if (controller.position.isScrollingNotifier.value) {
+        stopScrolling();
       }
     });
+  }
+
+  void offsetListener() {
+    var newOffset = context.read<AppStatus>().offset;
+    if (newOffset != chatOffset) {
+      chatOffset = newOffset;
+      seek(chatTime);
+    }
   }
 
   void play(double playerPosition) {
@@ -134,66 +152,36 @@ class _ChatState extends State<Chat> {
       "seek": seek,
       "speed": adjustSpeed
     });
+    context.read<AppStatus>().addListener(offsetListener);
+  }
+
+  void disposeSync() {
+    AmqpInterface().disposeSync();
+    context.read<AppStatus>().removeListener(offsetListener);
   }
 
   void resumeScrolling() {
-    controller.jumpTo(0);
-    setState(() => shouldScroll = true);
+    context.read<AppStatus>().resumeScrolling();
+  }
+
+  void stopScrolling() {
+    context.read<AppStatus>().stopScolling();
   }
 
   @override
   Widget build(BuildContext context) {
     Wakelock.enable();
-    return Stack(
-      children: <Widget>[
-        if (!shouldScroll)
-          Container(
-            padding: const EdgeInsets.all(8.0),
-            alignment: Alignment.bottomCenter,
-            child: ElevatedButton.icon(
-              icon: const Icon(Icons.arrow_downward),
-              style: ButtonStyle(
-                  overlayColor:
-                      MaterialStateProperty.all<Color>(Colors.redAccent),
-                  foregroundColor:
-                      MaterialStateProperty.all<Color>(Colors.white),
-                  elevation: MaterialStateProperty.all<double>(100),
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                      Colors.red.withOpacity(1))),
-              label: const Text('Resume scrolling'),
-              onPressed: null,
-            ),
-          ),
-        InkWell(
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-          hoverColor: Colors.transparent,
-          focusColor: Colors.transparent,
-          onTap: resumeScrolling,
-          onHover: (value) {
-            if (scrollTimeout != null) scrollTimeout!.cancel();
-            if (value) {
-              setState(() => shouldScroll = false);
-            } else {
-              scrollTimeout =
-                  Timer(const Duration(seconds: 10), resumeScrolling);
-            }
-          },
-          child: ScrollConfiguration(
-              behavior:
-                  ScrollConfiguration.of(context).copyWith(scrollbars: false),
-              child: ListView.builder(
-                controller: controller,
-                reverse: true,
-                cacheExtent: 0,
-                itemCount: nextMessageIndex,
-                itemBuilder: (BuildContext context, int index) => ChatMessage(
-                    streamer: streamer,
-                    comment: comments![nextMessageIndex - 1 - index],
-                    badges: badges),
-              )),
-        ),
-      ],
-    );
+    return ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: ListView.builder(
+          controller: controller,
+          reverse: true,
+          cacheExtent: 0,
+          itemCount: nextMessageIndex,
+          itemBuilder: (BuildContext context, int index) => ChatMessage(
+              streamer: streamer,
+              comment: comments![nextMessageIndex - 1 - index],
+              badges: badges),
+        ));
   }
 }

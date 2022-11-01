@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 class AmqpInterface {
   static final Client client = Client();
+  List<Consumer> consumers = [];
 
   Future<Map<String, dynamic>> retriveChat() async {
     final completer = Completer<Map<String, dynamic>>();
@@ -30,6 +31,7 @@ class AmqpInterface {
       client.close();
       SystemNavigator.pop();
     });
+    consumers.add(consumer);
   }
 
   void setupSync(Map<String, Function> callbacks) async {
@@ -43,7 +45,15 @@ class AmqpInterface {
         double arg = double.parse(message.payloadAsString);
         callbacks[key]!(arg);
       });
+      consumers.add(consumer);
     });
     setupExit();
+  }
+
+  void disposeSync() async {
+    for (Consumer consumer in consumers) {
+      await consumer.cancel();
+    }
+    consumers = [];
   }
 }
