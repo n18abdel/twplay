@@ -71,7 +71,7 @@ class ChatTextFragment {
             : TextSpan(
                 recognizer: isUrl
                     ? (TapGestureRecognizer()
-                      ..onTap = () async => await launch(token))
+                      ..onTap = () async => await launchUrl(Uri.parse(token)))
                     : null,
                 text: token,
                 style: TextStyle(
