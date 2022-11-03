@@ -70,6 +70,7 @@ class Utils {
       {required BuildContext context,
       required Text child,
       required String displayName}) {
+    String lookupUsername = displayName.toLowerCase();
     return TextButton(
       style: TextButton.styleFrom(
         padding: const EdgeInsets.all(0),
@@ -77,15 +78,25 @@ class Utils {
       ),
       onPressed: () {
         AppStatus appStatus = context.read<AppStatus>();
+        Set<String> mentions = {};
         Iterable<Comment>? filteredComments = appStatus.comments
             ?.getRange(0, appStatus.nextMessageIndex)
-            .where((c) {
-              return c.commenter?.displayName!.toLowerCase() ==
-                  displayName.toLowerCase();
-            })
             .toList()
-            .reversed;
-        ScrollController listScrollController = ScrollController();
+            .reversed
+            .where((c) {
+          String? commentUsername = c.commenter?.displayName!.toLowerCase();
+          bool isMention = mentions.contains(commentUsername);
+          bool isLookupUsernameComment = commentUsername == lookupUsername;
+          if (isLookupUsernameComment) {
+            Iterable<String> newMentions = c.message!.body!
+                .trim()
+                .split(RegExp('\\s+'))
+                .where((element) => element.startsWith("@"))
+                .map((e) => e.replaceFirst("@", "").toLowerCase());
+            mentions.addAll(newMentions);
+          }
+          return isLookupUsernameComment | isMention;
+        }).toList();
         showDialog(
             context: context,
             builder: (_) {
@@ -95,7 +106,6 @@ class Utils {
                   width: double.maxFinite,
                   child: ListView.builder(
                       reverse: true,
-                      controller: listScrollController,
                       itemCount: filteredComments?.length,
                       itemBuilder: (context, index) {
                         return ChatMessage(
