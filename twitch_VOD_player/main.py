@@ -89,7 +89,9 @@ def main() -> None:
     )
 
     tmpdir = tempfile.mkdtemp()
-    media = utils.get_media(args.local_file, args.cast, vod_id, tmpdir)
+    media = utils.get_media(
+        args.local_file, args.cast, args.url_or_user, vod_id, tmpdir
+    )
     player.play(media)
 
 

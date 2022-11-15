@@ -22,12 +22,17 @@ def setup_exit_handler(callback: Callable[[], None]) -> None:
 
 
 def parse_vod_id(url_or_user: str) -> str:
-    match = re.search(r"twitch.tv/videos/(\d+)", url_or_user)
-    if match:
-        return match.group(1)
+    is_twitch_vod_link = re.search(r"twitch.tv/videos/(\d+)", url_or_user)
+    is_twitchtracker_link = re.search(
+        r"twitchtracker.com/.*/streams/(\d+)", url_or_user
+    )
+    if is_twitch_vod_link:
+        return is_twitch_vod_link.group(1)
     user_id = controller.retrieve_user_id(url_or_user)
     if user_id:
         return controller.retrieve_last_vod_id(user_id)
+    elif is_twitchtracker_link:
+        return None
     else:
         print(
             "Couldn't parse VOD id\n",
@@ -59,8 +64,16 @@ def setup_timer_loop(
     return t
 
 
-def get_media(local_file: Optional[str], cast: bool, vod_id: str, tmpdir: str):
-    resolved = local_file or controller.retrieve_playable_url(vod_id, tmpdir)
+def get_media(
+    local_file: Optional[str],
+    cast: bool,
+    url_or_user: str,
+    vod_id: Optional[str],
+    tmpdir: str,
+):
+    resolved = local_file or controller.retrieve_playable_url(
+        url_or_user, vod_id, tmpdir
+    )
     if cast:
         controller.launch_file_server(resolved)
         local_ip = controller.retrieve_local_ip()

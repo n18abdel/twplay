@@ -15,7 +15,7 @@ import video_server
 
 
 def fetch_chat(
-    vod_id: str,
+    vod_id: Optional[str],
     chat_file: Optional[str],
     beginning: Optional[str],
     ending: Optional[str],
@@ -23,6 +23,11 @@ def fetch_chat(
     if chat_file:
         with open(chat_file, "r") as f:
             chat = f.readline()
+    elif not vod_id:
+        print(
+            "Couldn't fetch chat, no vod_id nor file was provided",
+        )
+        exit(1)
     else:
         with tempfile.NamedTemporaryFile() as f:
             command = [
@@ -49,12 +54,14 @@ def send_chat_file(channel: BlockingChannel, chat: Union[str, bytes]) -> None:
     topics.json(channel, chat)
 
 
-def retrieve_playable_url(vod_id: Union[int, str], tmpdir: str) -> str:
+def retrieve_playable_url(
+    url_or_user: str, vod_id: Optional[Union[int, str]], tmpdir: str
+) -> str:
     with tempfile.NamedTemporaryFile() as f:
         subprocess.run(
             [
                 "twitch_url_retriever",
-                f"https://www.twitch.tv/videos/{vod_id}",
+                f"https://www.twitch.tv/videos/{vod_id}" if vod_id else url_or_user,
                 "-o",
                 f.name,
                 "--tmpdir",
