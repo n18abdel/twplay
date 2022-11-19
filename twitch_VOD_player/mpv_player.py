@@ -30,7 +30,7 @@ class MpvPlayer(Player):
             ),
             "merge-files": "yes",
         }
-        if "http" in url:
+        if url.endswith(".m3u8"):
             options.update(
                 {
                     "cache": "yes",
