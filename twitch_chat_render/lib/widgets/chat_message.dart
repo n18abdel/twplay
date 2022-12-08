@@ -17,7 +17,7 @@ class ChatMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: comment!.message!.userNoticeParams!.msgId != null
+        color: comment!.message!.userNoticeParams?.msgId != null
             ? Colors.purple.withOpacity(0.5)
             : null,
       ),
