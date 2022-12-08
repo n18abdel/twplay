@@ -8,10 +8,9 @@ from time import sleep
 from typing import Optional, Union
 
 import requests
-from pika.adapters.blocking_connection import BlockingChannel
-
 import topics
 import video_server
+from pika.adapters.blocking_connection import BlockingChannel
 
 
 def fetch_chat(
@@ -29,7 +28,7 @@ def fetch_chat(
         )
         exit(1)
     else:
-        with tempfile.NamedTemporaryFile() as f:
+        with tempfile.NamedTemporaryFile(suffix=".json") as f:
             command = [
                 "TwitchDownloaderCLI",
                 "-m",
@@ -38,6 +37,8 @@ def fetch_chat(
                 vod_id,
                 "-o",
                 f.name,
+                "--chat-connections",
+                "1",
             ]
             if beginning:
                 command.extend(["-b", beginning])
