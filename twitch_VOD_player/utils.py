@@ -5,13 +5,12 @@ from functools import partial
 from types import FrameType
 from typing import Callable, List, Optional, Union
 
-from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
-from pynput import keyboard
-
 import controller
 import topics
 from mpv_player import MpvPlayer
+from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
 from player import Player
+from pynput import keyboard
 
 
 def setup_exit_handler(callback: Callable[[], None]) -> None:

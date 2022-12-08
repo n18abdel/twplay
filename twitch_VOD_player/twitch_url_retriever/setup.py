@@ -7,4 +7,7 @@ setup(
     entry_points={
         "console_scripts": ["twitch_url_retriever = twitch_url_retriever.main:main"]
     },
+    install_requires=[
+        "pexpect",
+    ],
 )
