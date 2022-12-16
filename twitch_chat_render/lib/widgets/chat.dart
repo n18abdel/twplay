@@ -5,9 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/amqp_interface.dart';
 import 'package:twitch_chat_render/models/app_status.dart';
-import 'package:twitch_chat_render/services/bttv_emotes.dart';
 import 'package:twitch_chat_render/services/twitch_badges.dart';
-import 'package:twitch_chat_render/services/twitch_cheer_emotes.dart';
 import 'package:twitch_chat_render/widgets/chat_message.dart';
 import 'package:wakelock/wakelock.dart';
 
@@ -25,10 +23,6 @@ class _ChatState extends State<Chat> {
       Provider.of<AppStatus>(context, listen: false).comments;
   TwitchBadges? get badges =>
       Provider.of<AppStatus>(context, listen: false).badges;
-  BTTVEmotes? get bttvEmotes =>
-      Provider.of<AppStatus>(context, listen: false).bttvEmotes;
-  TwitchCheerEmotes? get cheerEmotes =>
-      Provider.of<AppStatus>(context, listen: false).cheerEmotes;
   int get nextMessageIndex =>
       Provider.of<AppStatus>(context, listen: false).nextMessageIndex;
   Duration updatePeriod = const Duration(milliseconds: 300);

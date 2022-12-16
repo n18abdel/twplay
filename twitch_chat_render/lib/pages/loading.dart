@@ -48,6 +48,9 @@ class _LoadingPageState extends State<LoadingPage> {
                     text: "Fetching BTTV emotes",
                     item: context.select((AppStatus s) => s.bttvEmotes)),
                 LoadingItem(
+                    text: "Fetching 7TV emotes",
+                    item: context.select((AppStatus s) => s.stvEmotes)),
+                LoadingItem(
                     text: "Fetching Cheers emotes",
                     item: context.select((AppStatus s) => s.cheerEmotes)),
               ],

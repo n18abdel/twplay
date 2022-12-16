@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/amqp_interface.dart';
 import 'package:twitch_chat_render/services/bttv_emotes.dart';
+import 'package:twitch_chat_render/services/stv_emotes.dart';
 import 'package:twitch_chat_render/services/twitch_badges.dart';
 import 'package:twitch_chat_render/services/twitch_cheer_emotes.dart';
 
@@ -16,6 +17,7 @@ class AppStatus with ChangeNotifier {
   List<Comment>? comments;
   TwitchBadges? badges;
   BTTVEmotes? bttvEmotes;
+  STVEmotes? stvEmotes;
   TwitchCheerEmotes? cheerEmotes;
   bool initStatus = false;
   int nextMessageIndex = 0;
@@ -63,6 +65,7 @@ class AppStatus with ChangeNotifier {
     comments = chat.comments;
     fetchBadges();
     fetchBTTVEmotes();
+    fetchSTVEmotes();
     fetchCheerEmotes();
     notifyListeners();
   }
@@ -77,6 +80,11 @@ class AppStatus with ChangeNotifier {
     bttvEmotes!.fetchEmotes().then((value) => notifyListeners());
   }
 
+  void fetchSTVEmotes() {
+    stvEmotes = STVEmotes(streamer: streamer);
+    stvEmotes!.fetchEmotes().then((value) => notifyListeners());
+  }
+
   void fetchCheerEmotes() {
     cheerEmotes = TwitchCheerEmotes(streamer: streamer);
     cheerEmotes!.fetchEmotes().then((value) => notifyListeners());
@@ -89,6 +97,8 @@ class AppStatus with ChangeNotifier {
           badges!.initialized() &&
           bttvEmotes != null &&
           bttvEmotes!.initialized() &&
+          stvEmotes != null &&
+          stvEmotes!.initialized() &&
           cheerEmotes != null &&
           cheerEmotes!.initialized();
     }

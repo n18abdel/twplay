@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/bttv_emotes.dart';
+import 'package:twitch_chat_render/services/stv_emotes.dart';
 import 'package:twitch_chat_render/services/twitch_cheer_emotes.dart';
 import 'package:twitch_chat_render/widgets/utils.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -34,7 +35,9 @@ class ChatTextFragment {
     List<String> tokens = tokenize(fragment);
     List<InlineSpan> spans = [];
     for (var token in tokens) {
-      String? url = BTTVEmotes(streamer: streamer).getDownloadUrl(name: token);
+      String? url =
+          BTTVEmotes(streamer: streamer).getDownloadUrl(name: token) ??
+              STVEmotes(streamer: streamer).getDownloadUrl(name: token);
       bool isText = url == null;
       bool isBTTVEmote = url != null;
       if (isBTTVEmote) {
