@@ -24,7 +24,6 @@ class MpvPlayer(Player):
 
     def play(self, url: str) -> None:
         options = {
-            "hwdec": "auto",
             "stream-lavf-o-append": (
                 "protocol_whitelist=" "file,http,https,tcp,tls,crypto,hls,applehttp"
             ),
