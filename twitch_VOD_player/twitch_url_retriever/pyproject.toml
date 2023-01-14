@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "twitch-url-retriever"
+version = "0.1.0"
+description = ""
+authors = ["Nassim <abdelghani.nassim@gmail.com>"]
+readme = "README.md"
+packages = [{include = "twitch_url_retriever"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pexpect = "^4.8.0"
+
+[tool.poetry.scripts]
+twitch_url_retriever = "twitch_url_retriever.main:main"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -110,7 +110,7 @@ def launch_rabbitmq() -> None:
                 "15672:15672",
                 "-p",
                 "5672:5672",
-                "telecom/rabbitmq",
+                "rabbitmq:3-management",
             ]
         )
         sleep(20)
