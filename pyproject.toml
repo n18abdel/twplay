@@ -10,7 +10,7 @@ packages = [{include = "twitch_VOD_player"}]
 python = "^3.9"
 Flask-Cors = "^3.0.10"
 pika = "^1.3.1"
-PyChromecast = {git = "https://github.com/n18abdel/pychromecast.git"}
+PyChromecast = {git = "https://github.com/n18abdel/pychromecast.git", branch = "set_playback_rate"}
 pynput = "^1.7.6"
 python-mpv-jsonipc = {git = "https://github.com/n18abdel/python-mpv-jsonipc.git"}
 twitch_url_retriever = { path = "twitch_VOD_player/twitch_url_retriever/", develop = false }
