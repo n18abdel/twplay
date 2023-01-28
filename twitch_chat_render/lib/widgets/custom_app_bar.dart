@@ -16,13 +16,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     if (appStatus.speed != 1) {
       optionnals.add(Text(
         "Speed : ${appStatus.speed}",
-        style: Theme.of(context).textTheme.caption,
+        style: Theme.of(context).textTheme.bodySmall,
       ));
     }
     if (appStatus.offset != 0) {
       optionnals.add(Text(
         "Offset : ${appStatus.offset}s",
-        style: Theme.of(context).textTheme.caption,
+        style: Theme.of(context).textTheme.bodySmall,
       ));
     }
     return optionnals;
