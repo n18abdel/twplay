@@ -14,7 +14,7 @@ class ChatUser {
 
   WidgetSpan from(BuildContext context) {
     double backgroundLuminance =
-        Theme.of(context).backgroundColor.computeLuminance();
+        Theme.of(context).colorScheme.background.computeLuminance();
     Color baseColor = comment?.message?.userColor == null
         ? Color(comment!.commenter!.displayName!.hashCode)
         : HexColor(comment!.message!.userColor!);

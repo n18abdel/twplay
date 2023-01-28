@@ -73,6 +73,7 @@ class Utils {
     String lookupUsername = displayName.toLowerCase();
     return TextButton(
       style: TextButton.styleFrom(
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         padding: const EdgeInsets.all(0),
         minimumSize: const Size(0, 0),
       ),

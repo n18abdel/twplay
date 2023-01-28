@@ -1,15 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:twitch_chat_render/pages/chat.dart';
+import 'package:twitch_chat_render/pages/ip_setup.dart';
 import 'package:twitch_chat_render/pages/loading.dart';
 import 'package:twitch_chat_render/models/app_status.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  MyApp({Key? key}) : super(key: key);
+  final bool mobileOS = Platform.isIOS || Platform.isAndroid;
 
   @override
   Widget build(BuildContext context) {
@@ -20,10 +24,11 @@ class MyApp extends StatelessWidget {
         themeMode: ThemeMode.system,
         theme: ThemeData.light(),
         darkTheme: ThemeData.dark(),
-        initialRoute: "/loading",
+        initialRoute: mobileOS ? "/setup" : "/loading",
         routes: {
           "/chat": (_) => const ChatPage(),
-          "/loading": (_) => const LoadingPage()
+          "/loading": (_) => const LoadingPage(),
+          "/setup": (_) => const IpSetupPage()
         },
       ),
     );

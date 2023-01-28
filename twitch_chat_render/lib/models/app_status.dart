@@ -24,10 +24,7 @@ class AppStatus with ChangeNotifier {
   bool shouldScroll = true;
   ScrollController controller = ScrollController();
   Timer? scrollTimeout;
-
-  AppStatus() {
-    fetchChat();
-  }
+  String? amqpHost;
 
   void play() {
     playing = true;
@@ -60,7 +57,8 @@ class AppStatus with ChangeNotifier {
   }
 
   void fetchChat() async {
-    ChatModel chat = ChatModel.fromJson(await AmqpInterface().retriveChat());
+    ChatModel chat =
+        ChatModel.fromJson(await AmqpInterface().retriveChat(amqpHost ?? ''));
     streamer = chat.streamer;
     comments = chat.comments;
     fetchBadges();
@@ -130,5 +128,9 @@ class AppStatus with ChangeNotifier {
     if (!shouldScroll) {
       scrollTimeout = Timer(const Duration(seconds: 3), resumeScrolling);
     }
+  }
+
+  void setAmqpHost(String h) {
+    amqpHost = h;
   }
 }

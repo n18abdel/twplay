@@ -5,10 +5,13 @@ import "package:dart_amqp/dart_amqp.dart";
 import 'package:flutter/services.dart';
 
 class AmqpInterface {
-  static final Client client = Client();
+  static late final Client client;
   List<Consumer> consumers = [];
 
-  Future<Map<String, dynamic>> retriveChat() async {
+  Future<Map<String, dynamic>> retriveChat([String host = '']) async {
+    client = host.isEmpty
+        ? Client()
+        : Client(settings: ConnectionSettings(host: host));
     final completer = Completer<Map<String, dynamic>>();
 
     Channel channel = await client.channel();

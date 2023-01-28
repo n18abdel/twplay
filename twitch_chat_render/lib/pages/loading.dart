@@ -24,6 +24,7 @@ class _LoadingPageState extends State<LoadingPage> {
     super.initState();
     myProvider = Provider.of<AppStatus>(context, listen: false);
     context.read<AppStatus>().addListener(myCallback);
+    context.read<AppStatus>().fetchChat();
   }
 
   @override
