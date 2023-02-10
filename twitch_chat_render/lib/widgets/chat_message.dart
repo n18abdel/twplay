@@ -4,13 +4,16 @@ import 'package:twitch_chat_render/services/twitch_badges.dart';
 import 'package:twitch_chat_render/widgets/chat_emote.dart';
 import 'package:twitch_chat_render/widgets/chat_text_fragment.dart';
 import 'package:twitch_chat_render/widgets/chat_user.dart';
+import 'package:collection/collection.dart';
 
 class ChatMessage extends StatelessWidget {
-  const ChatMessage({Key? key, this.streamer, this.badges, this.comment})
+  const ChatMessage(
+      {Key? key, this.streamer, this.badges, this.index, this.comment})
       : super(key: key);
 
   final Streamer? streamer;
   final TwitchBadges? badges;
+  final int? index;
   final Comment? comment;
 
   @override
@@ -31,10 +34,15 @@ class ChatMessage extends StatelessWidget {
                           streamer: streamer, fragment: comment!.message!.body!)
                       .from(context)
                 ]
-              : comment!.message!.fragments!.map((fragment) {
+              : comment!.message!.fragments!
+                  .mapIndexed((fragmentIndex, fragment) {
                   return fragment.emoticon == null
                       ? ChatTextFragment(
-                              streamer: streamer, fragment: fragment.text!)
+                              streamer: streamer,
+                              fragment: fragment.text!,
+                              comment: comment,
+                              commentIndex: index,
+                              fragmentIndex: fragmentIndex)
                           .from(context)
                       : ChatEmote(
                               emoticon: fragment.emoticon, name: fragment.text!)

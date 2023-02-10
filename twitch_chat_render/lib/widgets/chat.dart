@@ -175,6 +175,7 @@ class _ChatState extends State<Chat> {
           itemBuilder: (BuildContext context, int index) => ChatMessage(
               streamer: streamer,
               comment: comments![nextMessageIndex - 1 - index],
+              index: nextMessageIndex - 1 - index,
               badges: badges),
         ));
   }

@@ -66,6 +66,31 @@ class Utils {
             child: tooltip(context: context, name: name, url: url)));
   }
 
+  static String replaceReplyMention(BuildContext context, String fragment,
+      {int? fragmentIndex, int? commentIndex, Comment? comment}) {
+    if (fragmentIndex != 0 || comment?.replyParentMsgId == null) {
+      return fragment;
+    }
+    List<Comment>? comments =
+        Provider.of<AppStatus>(context, listen: false).comments;
+
+    String? lastThreadUsername = comments
+        ?.getRange(0, commentIndex!)
+        .lastWhere((c) {
+          return c.id == comment?.replyParentMsgId ||
+              c.replyParentMsgId == comment?.replyParentMsgId &&
+                  c.commenter?.displayName!.toLowerCase() !=
+                      comment?.commenter?.displayName!.toLowerCase();
+        })
+        .commenter
+        ?.displayName!
+        .toLowerCase();
+    if (lastThreadUsername == null) {
+      return fragment;
+    }
+    return fragment.replaceFirst(RegExp(r'\S*'), "@$lastThreadUsername");
+  }
+
   static TextButton clickableUsername(
       {required BuildContext context,
       required Text child,
@@ -89,14 +114,18 @@ class Utils {
           bool isMention = mentions.contains(commentUsername);
           bool isLookupUsernameComment = commentUsername == lookupUsername;
           if (isLookupUsernameComment) {
-            Iterable<String> newMentions = c.message!.body!
+            Iterable<String> newMentions = replaceReplyMention(
+                    context, c.message!.body!,
+                    comment: c,
+                    fragmentIndex: 0,
+                    commentIndex: appStatus.comments!.indexOf(c))
                 .trim()
                 .split(RegExp('\\s+'))
                 .where((element) => element.startsWith("@"))
                 .map((e) => e.replaceFirst("@", "").toLowerCase());
             mentions.addAll(newMentions);
           }
-          return isLookupUsernameComment | isMention;
+          return isLookupUsernameComment || isMention;
         }).toList();
         showDialog(
             context: context,
@@ -109,10 +138,12 @@ class Utils {
                       reverse: true,
                       itemCount: filteredComments?.length,
                       itemBuilder: (context, index) {
+                        Comment? c = filteredComments?.elementAt(index);
                         return ChatMessage(
                             streamer: appStatus.streamer,
                             badges: appStatus.badges,
-                            comment: filteredComments?.elementAt(index));
+                            index: appStatus.comments!.indexOf(c!),
+                            comment: c);
                       }),
                 ),
               );

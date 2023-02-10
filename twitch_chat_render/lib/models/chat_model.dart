@@ -49,6 +49,7 @@ class Streamer {
 
 class Comment {
   final String? id;
+  final String? replyParentMsgId;
   final String? createdAt;
   final String? updatedAt;
   final String? channelId;
@@ -63,6 +64,7 @@ class Comment {
 
   Comment({
     this.id,
+    this.replyParentMsgId,
     this.createdAt,
     this.updatedAt,
     this.channelId,
@@ -78,6 +80,7 @@ class Comment {
 
   Comment.fromJson(Map<String, dynamic> json)
       : id = json['_id'] as String?,
+        replyParentMsgId = json['reply_parent_msg_id'] as String?,
         createdAt = json['created_at'] as String?,
         updatedAt = json['updated_at'] as String?,
         channelId = json['channel_id'] as String?,
@@ -96,6 +99,7 @@ class Comment {
 
   Map<String, dynamic> toJson() => {
         '_id': id,
+        'reply_parent_msg_id': replyParentMsgId,
         'created_at': createdAt,
         'updated_at': updatedAt,
         'channel_id': channelId,
