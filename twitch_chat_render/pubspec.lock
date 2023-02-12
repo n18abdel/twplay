@@ -20,10 +20,11 @@ packages:
   cached_network_image:
     dependency: "direct main"
     description:
-      name: cached_network_image
-      sha256: fd3d0dc1d451f9a252b32d95d3f0c3c487bc41a75eba2e6097cb0b9c71491b15
-      url: "https://pub.dev"
-    source: hosted
+      path: cached_network_image
+      ref: HEAD
+      resolved-ref: ca0db797d467881c2360c0bb7ca40de7f01a774b
+      url: "https://github.com/n18abdel/flutter_cached_network_image.git"
+    source: git
     version: "3.2.3"
   cached_network_image_platform_interface:
     dependency: transitive
