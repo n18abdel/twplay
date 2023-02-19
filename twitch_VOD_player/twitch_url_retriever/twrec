@@ -1,4 +1,0 @@
-#!/bin/sh
-
-# Edit the JAR path here
-java -jar ~/Downloads/TwitchRecover.jar $*
