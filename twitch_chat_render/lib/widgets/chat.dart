@@ -72,6 +72,7 @@ class _ChatState extends State<Chat> {
   }
 
   void play(double playerPosition) {
+    Wakelock.enable();
     context.read<AppStatus>().play();
     chatInitPosition = playerPosition;
     stopwatch
@@ -90,6 +91,7 @@ class _ChatState extends State<Chat> {
   }
 
   void pause(double playerPosition) {
+    Wakelock.disable();
     context.read<AppStatus>().pause();
     timer?.cancel();
     stopwatch.stop();
@@ -164,7 +166,6 @@ class _ChatState extends State<Chat> {
 
   @override
   Widget build(BuildContext context) {
-    Wakelock.enable();
     return ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
         child: ListView.builder(
