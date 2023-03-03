@@ -19,23 +19,38 @@ class TwitchCheerEmotes {
   }
 
   Future<void> fetchEmotes() async {
-    Map response = jsonDecode((await http.get(
-            Uri.parse(
-                "https://api.twitch.tv/kraken/bits/actions?channel_id=${streamer?.id}"),
-            headers: {
-          "Accept": "application/vnd.twitchtv.v5+json",
-          "Client-ID": "kimne78kx3ncx6brgo4mv6wki5h1ko"
-        }))
-        .body);
+    Map response =
+        jsonDecode((await http.post(Uri.parse("https://gql.twitch.tv/gql"),
+                headers: {
+                  "Content-Type": "application/json",
+                  "Client-ID": "kimne78kx3ncx6brgo4mv6wki5h1ko"
+                },
+                body: json.encode({
+                  "query":
+                      "query{cheerConfig{displayConfig{colors{bits,color}},groups{nodes{id, prefix, tiers{bits}}, templateURL}},user(id:\"${streamer?.id}\"){cheer{cheerGroups{nodes{id,prefix,tiers{bits}},templateURL}}}}"
+                })))
+            .body);
+    List cheerGroups = List.from(response["data"]["cheerConfig"]["groups"])
+      ..addAll(response["data"]["user"]["cheer"]["cheerGroups"] ?? []);
     globalCheers ??= {
-      for (var emoteToken in response['actions'])
-        emoteToken["prefix"]: {
-          for (var tierToken in emoteToken["tiers"])
-            tierToken["min_bits"]: {
-              "url": tierToken["images"]["dark"]["animated"]["1"],
-              "color": tierToken["color"]
-            }
-        }
+      for (var cheerGroup in cheerGroups)
+        for (var cheermote in cheerGroup["nodes"])
+          cheermote["prefix"]: {
+            for (var tierToken in cheermote["tiers"])
+              tierToken["bits"]: {
+                "url": (cheerGroup["templateURL"] as String)
+                    .replaceFirst(
+                        "PREFIX", (cheermote["prefix"] as String).toLowerCase())
+                    .replaceFirst("BACKGROUND", "dark")
+                    .replaceFirst("ANIMATION", "animated")
+                    .replaceFirst("TIER", tierToken["bits"].toString())
+                    .replaceFirst("SCALE.EXTENSION", "1.gif"),
+                "color": (response["data"]["cheerConfig"]["displayConfig"]
+                        ["colors"] as List)
+                    .firstWhere(
+                        (el) => el["bits"] == tierToken["bits"])["color"]
+              }
+          }
     };
   }
 
