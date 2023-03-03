@@ -65,20 +65,24 @@ defmodule Twitch do
   def url(vod_id) do
     {:ok, {{_, 200, _}, _, body}} =
       :httpc.request(
-        :get,
-        {"https://api.twitch.tv/kraken/videos/#{vod_id}",
+        :post,
+        {"https://gql.twitch.tv/gql",
          [
            {'User-Agent', 'Mozilla/5.0'},
-           {'Accept', 'application/vnd.twitchtv.v5+json'},
            {'Client-ID', 'kimne78kx3ncx6brgo4mv6wki5h1ko'}
-         ]},
+         ], 'application/json',
+         %{
+           query:
+             "query {\n\tvideo(id: \"#{vod_id}\") {\n\t\t...Video\n\t}\n}\n\nfragment Video on Video {\n\tseekPreviewsURL,\n}"
+         }
+         |> Jason.encode!()},
         http_request_opts(),
         []
       )
 
     body
     |> Jason.decode!(keys: :atoms)
-    |> Map.get(:seek_previews_url)
+    |> get_in([:data, :video, :seekPreviewsURL])
     |> String.replace(~r"storyboards.*", "chunked/index-dvr.m3u8")
     |> unmute()
   end
