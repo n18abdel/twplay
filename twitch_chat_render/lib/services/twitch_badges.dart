@@ -1,7 +1,5 @@
-import 'dart:convert';
-
 import 'package:twitch_chat_render/models/chat_model.dart';
-import 'package:http/http.dart' as http;
+import 'package:twitch_chat_render/services/twitch.dart';
 
 class TwitchBadges {
   Streamer? streamer;
@@ -19,12 +17,33 @@ class TwitchBadges {
   }
 
   Future<void> fetchBadges() async {
-    globalBadges ??= jsonDecode((await http.get(
-            Uri.parse("https://badges.twitch.tv/v1/badges/global/display")))
-        .body)["badge_sets"];
-    subBadges ??= jsonDecode((await http.get(Uri.parse(
-            "https://badges.twitch.tv/v1/badges/channels/${streamer?.id}/display")))
-        .body)["badge_sets"];
+    globalBadges ??= aggregate((await Twitch.request(
+            {"query": "query {badges{...Badge}} ${badgeFragment()}"}))["data"]
+        ["badges"]);
+
+    subBadges ??= aggregate((await Twitch.request({
+      "query":
+          "query {user(id: ${streamer?.id}) {broadcastBadges {...Badge}}} ${badgeFragment()}"
+    }))["data"]["user"]["broadcastBadges"]);
+  }
+
+  String badgeFragment() {
+    return "fragment Badge on Badge {title,setID,version,imageURL}";
+  }
+
+  Map aggregate(List badges) {
+    return badges.fold({}, (Map agg, badge) {
+      return {
+        ...agg,
+        badge["setID"]: {
+          ...(agg[badge["setID"]] ?? {}),
+          badge["version"]: {
+            "image_url": badge["imageURL"],
+            "title": badge["title"]
+          }
+        }
+      };
+    });
   }
 
   bool initialized() {
@@ -33,13 +52,13 @@ class TwitchBadges {
 
   String getDownloadUrl({name, version}) {
     while (globalBadges == null || subBadges == null) {}
-    return (subBadges?[name]?["versions"][version] ??
-        globalBadges?[name]?["versions"][version])["image_url_1x"];
+    return (subBadges?[name]?[version] ??
+        globalBadges?[name]?[version])["image_url"];
   }
 
   String getTitle({name, version}) {
     while (globalBadges == null || subBadges == null) {}
-    return (subBadges?[name]?["versions"][version] ??
-        globalBadges?[name]?["versions"][version])["title"];
+    return (subBadges?[name]?[version] ??
+        globalBadges?[name]?[version])["title"];
   }
 }

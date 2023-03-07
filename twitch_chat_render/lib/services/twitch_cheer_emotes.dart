@@ -1,7 +1,5 @@
-import 'dart:convert';
-
 import 'package:twitch_chat_render/models/chat_model.dart';
-import 'package:http/http.dart' as http;
+import 'package:twitch_chat_render/services/twitch.dart';
 
 class TwitchCheerEmotes {
   Streamer? streamer;
@@ -19,17 +17,20 @@ class TwitchCheerEmotes {
   }
 
   Future<void> fetchEmotes() async {
-    Map response =
-        jsonDecode((await http.post(Uri.parse("https://gql.twitch.tv/gql"),
-                headers: {
-                  "Content-Type": "application/json",
-                  "Client-ID": "kimne78kx3ncx6brgo4mv6wki5h1ko"
-                },
-                body: json.encode({
-                  "query":
-                      "query{cheerConfig{displayConfig{colors{bits,color}},groups{nodes{id, prefix, tiers{bits}}, templateURL}},user(id:\"${streamer?.id}\"){cheer{cheerGroups{nodes{id,prefix,tiers{bits}},templateURL}}}}"
-                })))
-            .body);
+    Map response = await Twitch.request({
+      "query": """
+                query {
+                  cheerConfig {
+                    displayConfig {colors {bits, color}}
+                    groups {...CheermoteGroup}
+                  }
+                  user(id: ${streamer?.id}) {
+                    cheer {cheerGroups {...CheermoteGroup}}
+                  }
+                }
+                ${cheermoteGroupFragment()}
+                """
+    });
     List cheerGroups = List.from(response["data"]["cheerConfig"]["groups"])
       ..addAll(response["data"]["user"]["cheer"]["cheerGroups"] ?? []);
     globalCheers ??= {
@@ -52,6 +53,10 @@ class TwitchCheerEmotes {
               }
           }
     };
+  }
+
+  String cheermoteGroupFragment() {
+    return "fragment CheermoteGroup on CheermoteGroup {nodes {id, prefix, tiers {bits}}, templateURL}";
   }
 
   bool initialized() {
