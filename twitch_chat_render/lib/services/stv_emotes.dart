@@ -23,14 +23,14 @@ class STVEmotes {
       for (var emote in jsonDecode(
           (await http.get(Uri.parse("https://7tv.io/v3/emote-sets/global")))
               .body)["emotes"])
-        emote["name"]: "https:${emote["data"]["host"]["url"]}/1x"
+        emote["name"]: "https:${emote["data"]["host"]["url"]}/1x.webp"
     };
     Map channelResponse = jsonDecode((await http
             .get(Uri.parse("https://7tv.io/v3/users/twitch/${streamer?.id}")))
         .body);
     channelEmotes ??= {
       for (var emote in channelResponse["emote_set"]?["emotes"] ?? [])
-        emote["name"]: "https:${emote["data"]["host"]["url"]}/1x"
+        emote["name"]: "https:${emote["data"]["host"]["url"]}/1x.webp"
     };
   }
 
