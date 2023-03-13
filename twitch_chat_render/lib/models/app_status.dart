@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twitch_chat_render/models/chat_model.dart';
 import 'package:twitch_chat_render/services/amqp_interface.dart';
 import 'package:twitch_chat_render/services/bttv_emotes.dart';
@@ -25,6 +27,7 @@ class AppStatus with ChangeNotifier {
   ScrollController controller = ScrollController();
   Timer? scrollTimeout;
   String? amqpHost;
+  final Future<SharedPreferences> prefs = SharedPreferences.getInstance();
 
   void play() {
     playing = true;
@@ -61,11 +64,18 @@ class AppStatus with ChangeNotifier {
         ChatModel.fromJson(await AmqpInterface().retriveChat(amqpHost ?? ''));
     streamer = chat.streamer;
     comments = chat.comments;
+    fetchOffset();
     fetchBadges();
     fetchBTTVEmotes();
     fetchSTVEmotes();
     fetchCheerEmotes();
     notifyListeners();
+  }
+
+  void fetchOffset() {
+    prefs.then((prefs) {
+      setOffset(prefs.getDouble(offsetStorageKey()) ?? 0);
+    });
   }
 
   void fetchBadges() {
@@ -130,7 +140,27 @@ class AppStatus with ChangeNotifier {
     }
   }
 
+  void readAmqpHost(TextEditingController controller) {
+    prefs.then((prefs) {
+      if (controller.text.isEmpty) {
+        controller.text = prefs.getString("host") ?? "";
+      }
+    });
+  }
+
   void setAmqpHost(String h) {
+    prefs.then((prefs) => prefs.setString('host', h));
     amqpHost = h;
+  }
+
+  String offsetStorageKey() {
+    return comments!.first.id!;
+  }
+
+  void exitCallback() {
+    prefs.then((prefs) {
+      prefs.setDouble(offsetStorageKey(), offset);
+      SystemNavigator.pop();
+    });
   }
 }

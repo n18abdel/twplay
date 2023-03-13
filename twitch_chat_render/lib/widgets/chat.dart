@@ -29,13 +29,11 @@ class _ChatState extends State<Chat> {
   Timer? timer;
   Stopwatch stopwatch = Stopwatch();
   double chatInitPosition = 0;
-  double chatSpeed = 1;
+  double get speed => Provider.of<AppStatus>(context, listen: false).speed;
   double get chatTime =>
-      chatInitPosition + chatSpeed * stopwatch.elapsed.inMilliseconds / 1000;
+      chatInitPosition + speed * stopwatch.elapsed.inMilliseconds / 1000;
   double chatOffset = 0;
   bool get playing => Provider.of<AppStatus>(context, listen: false).playing;
-  bool get initStatus =>
-      Provider.of<AppStatus>(context, listen: false).initStatus;
   bool get shouldScroll =>
       Provider.of<AppStatus>(context, listen: false).shouldScroll;
   ScrollController get controller =>
@@ -104,8 +102,7 @@ class _ChatState extends State<Chat> {
 
   void adjustSpeed(double playerSpeed) {
     adjustTimer(chatTime);
-    chatSpeed = playerSpeed;
-    Provider.of<AppStatus>(context, listen: false).setSpeed(playerSpeed);
+    context.read<AppStatus>().setSpeed(playerSpeed);
   }
 
   void seek(double playerPosition) {
@@ -140,6 +137,10 @@ class _ChatState extends State<Chat> {
     }
   }
 
+  void exitCallback() {
+    context.read<AppStatus>().exitCallback();
+  }
+
   void setupSync() {
     AmqpInterface().setupSync({
       "play": play,
@@ -147,7 +148,7 @@ class _ChatState extends State<Chat> {
       "timer": adjustTimer,
       "seek": seek,
       "speed": adjustSpeed
-    });
+    }, exitCallback);
     context.read<AppStatus>().addListener(offsetListener);
   }
 

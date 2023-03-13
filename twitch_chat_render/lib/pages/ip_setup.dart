@@ -10,11 +10,17 @@ class IpSetupPage extends StatefulWidget {
 }
 
 class _IpSetupPageState extends State<IpSetupPage> {
-  String ip = "";
+  TextEditingController controller = TextEditingController();
 
   void submit(BuildContext context) {
-    context.read<AppStatus>().setAmqpHost(ip);
+    context.read<AppStatus>().setAmqpHost(controller.text);
     Navigator.pushReplacementNamed(context, "/loading");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<AppStatus>().readAmqpHost(controller);
   }
 
   @override
@@ -27,6 +33,7 @@ class _IpSetupPageState extends State<IpSetupPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             TextFormField(
+              controller: controller,
               decoration: const InputDecoration(
                 hintText: 'Enter your server host/IP',
               ),
@@ -36,7 +43,6 @@ class _IpSetupPageState extends State<IpSetupPage> {
                 }
                 return null;
               },
-              onChanged: (value) => {ip = value},
               onFieldSubmitted: (value) => submit(context),
             ),
             Padding(
