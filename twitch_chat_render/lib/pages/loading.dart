@@ -15,7 +15,8 @@ class _LoadingPageState extends State<LoadingPage> {
 
   void myCallback() {
     if (context.read<AppStatus>().loaded()) {
-      Navigator.pushReplacementNamed(context, "/chat");
+      Navigator.pushReplacementNamed(context, "/chat")
+          .then((_) => myProvider.exitLoadingPage());
     }
   }
 
@@ -23,8 +24,8 @@ class _LoadingPageState extends State<LoadingPage> {
   void initState() {
     super.initState();
     myProvider = Provider.of<AppStatus>(context, listen: false);
-    context.read<AppStatus>().addListener(myCallback);
-    context.read<AppStatus>().fetchChat();
+    myProvider.addListener(myCallback);
+    myProvider.fetchChat();
   }
 
   @override

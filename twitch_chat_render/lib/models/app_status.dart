@@ -22,6 +22,7 @@ class AppStatus with ChangeNotifier {
   STVEmotes? stvEmotes;
   TwitchCheerEmotes? cheerEmotes;
   bool initStatus = false;
+  bool loadingPage = true;
   int nextMessageIndex = 0;
   bool shouldScroll = true;
   ScrollController controller = ScrollController();
@@ -113,6 +114,10 @@ class AppStatus with ChangeNotifier {
     return initStatus;
   }
 
+  void exitLoadingPage() {
+    loadingPage = false;
+  }
+
   void incNextMessageIndex() {
     nextMessageIndex++;
   }
@@ -130,7 +135,8 @@ class AppStatus with ChangeNotifier {
   void stopScolling() {
     shouldScroll = false;
     hoverChat();
-    notifyListeners();
+    Future<void>.delayed(Duration(milliseconds: loadingPage ? 500 : 0))
+        .then((_) => notifyListeners());
   }
 
   void hoverChat() {
