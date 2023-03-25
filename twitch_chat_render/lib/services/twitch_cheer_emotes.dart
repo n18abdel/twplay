@@ -32,7 +32,7 @@ class TwitchCheerEmotes {
                 """
     });
     List cheerGroups = List.from(response["data"]["cheerConfig"]["groups"])
-      ..addAll(response["data"]["user"]["cheer"]["cheerGroups"] ?? []);
+      ..addAll(response["data"]["user"]["cheer"]?["cheerGroups"] ?? []);
     globalCheers ??= {
       for (var cheerGroup in cheerGroups)
         for (var cheermote in cheerGroup["nodes"])
