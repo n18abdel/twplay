@@ -31,7 +31,7 @@ Twplay allows you to watch a Twitch VOD while displaying the chat in sync.
 ```bash
 cd twitch_chat_render/
 flutter config --enable-macos-desktop
-flutter build macos
+flutter build macos --release
 cp -r build/macos/Build/Products/Release/twitch_chat_render.app /Applications
 ```
 
