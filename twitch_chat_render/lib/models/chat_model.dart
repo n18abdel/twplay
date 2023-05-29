@@ -86,7 +86,9 @@ class Comment {
         channelId = json['channel_id'] as String?,
         contentType = json['content_type'] as String?,
         contentId = json['content_id'] as String?,
-        contentOffsetSeconds = json['content_offset_seconds'] as double?,
+        contentOffsetSeconds = (json['content_offset_seconds'] is int)
+            ? (json['content_offset_seconds'] as int).toDouble()
+            : (json['content_offset_seconds'] as double?),
         commenter = (json['commenter'] as Map<String, dynamic>?) != null
             ? Commenter.fromJson(json['commenter'] as Map<String, dynamic>)
             : null,
@@ -244,8 +246,12 @@ class Video {
   });
 
   Video.fromJson(Map<String, dynamic> json)
-      : start = json['start'] as double?,
-        end = json['end'] as double?;
+      : start = (json['start'] is int)
+            ? (json['start'] as int).toDouble()
+            : (json['start'] as double?),
+        end = (json['end'] is int)
+            ? (json['end'] as int).toDouble()
+            : (json['end'] as double?);
 
   Map<String, dynamic> toJson() => {'start': start, 'end': end};
 }
